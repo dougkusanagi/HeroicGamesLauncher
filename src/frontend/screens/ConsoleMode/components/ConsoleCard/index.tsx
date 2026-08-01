@@ -34,12 +34,12 @@ type Props = {
   focused: boolean
   needsUpdate: boolean
   onClick: () => void
-  onMouseEnter: () => void
+  onMouseMove: () => void
   onFocus: () => void
 }
 
 const ConsoleCard = forwardRef<HTMLButtonElement, Props>(function ConsoleCard(
-  { game, focused, needsUpdate, onClick, onMouseEnter, onFocus },
+  { game, focused, needsUpdate, onClick, onMouseMove, onFocus },
   ref
 ) {
   const { t } = useTranslation()
@@ -61,7 +61,7 @@ const ConsoleCard = forwardRef<HTMLButtonElement, Props>(function ConsoleCard(
       })}
       tabIndex={focused ? 0 : -1}
       onClick={onClick}
-      onMouseEnter={onMouseEnter}
+      onMouseMove={onMouseMove}
       onFocus={onFocus}
     >
       <CachedImage

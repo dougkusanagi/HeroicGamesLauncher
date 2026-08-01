@@ -538,7 +538,11 @@ export default function ConsoleMode() {
                       if (isFocused) activateGame(game)
                       else setFocusedIndex(i)
                     }}
-                    onMouseEnter={() => setFocusedIndex(i)}
+                    // A scroll can move a card under a stationary pointer and
+                    // fire mouseenter. Only real pointer movement should
+                    // change selection, otherwise smooth scrolling can undo
+                    // a controller navigation immediately.
+                    onMouseMove={() => setFocusedIndex(i)}
                     onFocus={() => setFocusedIndex(i)}
                   />
                 )
