@@ -460,15 +460,17 @@
     z-index: 2;
     transform: scale(1.08);
     filter: saturate(1) brightness(1);
-    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.58);
+    box-shadow:
+      0 14px 30px rgba(0, 0, 0, 0.58),
+      0 0 18px color-mix(in srgb, var(--console-accent) 30%, transparent);
 
     &::after {
       border-color: var(--console-accent);
       box-shadow:
-        inset 0 0 18px
-          color-mix(in srgb, var(--console-accent) 62%, transparent),
-        inset 0 0 42px
-          color-mix(in srgb, var(--console-accent) 24%, transparent);
+        inset 0 0 22px
+          color-mix(in srgb, var(--console-accent) 76%, transparent),
+        inset 0 0 50px
+          color-mix(in srgb, var(--console-accent) 34%, transparent);
     }
   }
 }
