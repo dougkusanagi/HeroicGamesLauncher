@@ -7,6 +7,19 @@ type Tone = {
   to: number
   gain: number
   type?: OscillatorType
+  filterFrom?: number
+  filterTo?: number
+  attack?: number
+  release?: number
+  pan?: number
+}
+
+type Noise = {
+  at: number
+  duration: number
+  gain: number
+  filterFrom: number
+  filterTo: number
 }
 
 const MASTER_GAIN = 0.12
@@ -16,88 +29,120 @@ const tones: Record<ConsoleSound, Tone[]> = {
   move: [
     {
       at: 0,
-      duration: 0.085,
-      from: 430,
-      to: 540,
-      gain: 0.22,
+      duration: 0.075,
+      from: 520,
+      to: 610,
+      gain: 0.17,
+      filterFrom: 2200,
+      filterTo: 3000,
+      type: 'sine'
+    },
+    {
+      at: 0.018,
+      duration: 0.135,
+      from: 780,
+      to: 920,
+      gain: 0.09,
+      filterFrom: 2800,
+      filterTo: 3600,
       type: 'triangle'
-    },
-    {
-      at: 0.012,
-      duration: 0.12,
-      from: 760,
-      to: 1060,
-      gain: 0.14
-    },
-    {
-      at: 0.035,
-      duration: 0.14,
-      from: 1180,
-      to: 1480,
-      gain: 0.055
     }
   ],
   confirm: [
     {
       at: 0,
-      duration: 0.095,
+      duration: 0.1,
       from: 430,
-      to: 600,
-      gain: 0.24,
+      to: 520,
+      gain: 0.2,
+      filterFrom: 2200,
+      filterTo: 3000,
       type: 'triangle'
     },
     {
       at: 0.055,
-      duration: 0.16,
-      from: 680,
-      to: 940,
-      gain: 0.17
+      duration: 0.17,
+      from: 650,
+      to: 780,
+      gain: 0.13,
+      filterFrom: 2600,
+      filterTo: 3600
     },
     {
-      at: 0.09,
-      duration: 0.19,
-      from: 960,
-      to: 1240,
-      gain: 0.08
+      at: 0.12,
+      duration: 0.23,
+      from: 975,
+      to: 1170,
+      gain: 0.065,
+      filterFrom: 3000,
+      filterTo: 4200
     }
   ],
   launch: [
     {
       at: 0,
-      duration: 0.34,
-      from: 105,
-      to: 170,
-      gain: 0.2,
+      duration: 0.3,
+      from: 98,
+      to: 131,
+      gain: 0.15,
+      filterFrom: 900,
+      filterTo: 1300,
       type: 'triangle'
     },
     {
       at: 0.035,
       duration: 0.43,
-      from: 220,
-      to: 420,
-      gain: 0.16
+      from: 196,
+      to: 233,
+      gain: 0.105,
+      filterFrom: 1500,
+      filterTo: 2300
     },
     {
-      at: 0.105,
-      duration: 0.56,
-      from: 420,
-      to: 860,
-      gain: 0.14,
+      at: 0.08,
+      duration: 0.52,
+      from: 294,
+      to: 349,
+      gain: 0.105,
+      filterFrom: 1800,
+      filterTo: 2900,
       type: 'triangle'
     },
     {
-      at: 0.17,
-      duration: 0.66,
-      from: 720,
-      to: 1420,
-      gain: 0.1
+      at: 0.15,
+      duration: 0.64,
+      from: 392,
+      to: 466,
+      gain: 0.09,
+      filterFrom: 2200,
+      filterTo: 3400
     },
     {
-      at: 0.32,
-      duration: 0.55,
-      from: 1040,
-      to: 1580,
-      gain: 0.065
+      at: 0.23,
+      duration: 0.76,
+      from: 587,
+      to: 698,
+      gain: 0.07,
+      filterFrom: 2600,
+      filterTo: 4000
+    },
+    {
+      at: 0.4,
+      duration: 0.78,
+      from: 784,
+      to: 932,
+      gain: 0.045,
+      filterFrom: 3000,
+      filterTo: 4600
+    },
+    {
+      at: 0.52,
+      duration: 0.72,
+      from: 1046,
+      to: 1046,
+      gain: 0.04,
+      filterFrom: 3200,
+      filterTo: 4200
     }
   ],
   back: [
@@ -150,6 +195,18 @@ const tones: Record<ConsoleSound, Tone[]> = {
   ]
 }
 
+const noise: Partial<Record<ConsoleSound, Noise[]>> = {
+  launch: [
+    {
+      at: 0.12,
+      duration: 0.86,
+      gain: 0.035,
+      filterFrom: 700,
+      filterTo: 3600
+    }
+  ]
+}
+
 let audioContext: AudioContext | null = null
 let masterNode: GainNode | null = null
 let outputNode: DynamicsCompressorNode | null = null
@@ -175,22 +232,68 @@ function getAudioContext() {
 
 function playTone(context: AudioContext, master: GainNode, tone: Tone) {
   const oscillator = context.createOscillator()
+  const filter = context.createBiquadFilter()
+  const panner = context.createStereoPanner()
   const envelope = context.createGain()
   const start = context.currentTime + tone.at
   const end = start + tone.duration
+  const attack = Math.min(tone.attack ?? 0.012, tone.duration * 0.3)
+  const release = Math.min(tone.release ?? 0.09, tone.duration * 0.45)
+  const sustainEnd = Math.max(start + attack, end - release)
 
   oscillator.type = tone.type ?? 'sine'
   oscillator.frequency.setValueAtTime(tone.from, start)
   oscillator.frequency.exponentialRampToValueAtTime(tone.to, end)
 
+  filter.type = 'lowpass'
+  filter.Q.value = 0.55
+  filter.frequency.setValueAtTime(tone.filterFrom ?? 3200, start)
+  filter.frequency.exponentialRampToValueAtTime(tone.filterTo ?? 4200, end)
+
+  panner.pan.value = tone.pan ?? 0
   envelope.gain.setValueAtTime(0.0001, start)
-  envelope.gain.exponentialRampToValueAtTime(tone.gain, start + 0.008)
+  envelope.gain.exponentialRampToValueAtTime(tone.gain, start + attack)
+  envelope.gain.setValueAtTime(tone.gain, sustainEnd)
   envelope.gain.exponentialRampToValueAtTime(0.0001, end)
 
-  oscillator.connect(envelope)
+  oscillator.connect(filter)
+  filter.connect(panner)
+  panner.connect(envelope)
   envelope.connect(master)
   oscillator.start(start)
   oscillator.stop(end + 0.02)
+}
+
+function playNoise(context: AudioContext, master: GainNode, effect: Noise) {
+  const sampleCount = Math.ceil(context.sampleRate * effect.duration)
+  const buffer = context.createBuffer(1, sampleCount, context.sampleRate)
+  const samples = buffer.getChannelData(0)
+
+  for (let index = 0; index < sampleCount; index += 1) {
+    samples[index] = Math.random() * 2 - 1
+  }
+
+  const source = context.createBufferSource()
+  const filter = context.createBiquadFilter()
+  const envelope = context.createGain()
+  const start = context.currentTime + effect.at
+  const end = start + effect.duration
+
+  filter.type = 'lowpass'
+  filter.Q.value = 0.35
+  filter.frequency.setValueAtTime(effect.filterFrom, start)
+  filter.frequency.exponentialRampToValueAtTime(effect.filterTo, end)
+
+  envelope.gain.setValueAtTime(0.0001, start)
+  envelope.gain.exponentialRampToValueAtTime(effect.gain, start + 0.08)
+  envelope.gain.exponentialRampToValueAtTime(0.0001, end)
+
+  source.buffer = buffer
+  source.connect(filter)
+  filter.connect(envelope)
+  envelope.connect(master)
+  source.start(start)
+  source.stop(end + 0.02)
 }
 
 /**
@@ -209,4 +312,6 @@ export function playConsoleSound(sound: ConsoleSound) {
 
   void context.resume().catch(() => {})
   for (const tone of tones[sound]) playTone(context, masterNode, tone)
+  for (const effect of noise[sound] ?? [])
+    playNoise(context, masterNode, effect)
 }
