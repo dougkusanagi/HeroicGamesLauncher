@@ -829,30 +829,31 @@
     xbox: (
       xbox-series,
       XboxSeriesX,
-      (A, B, LB, RB, RT)
+      (A, B, X, LB, RB, RT)
     ),
     ps4: (
       ps4,
       PS4,
-      (Cross, Circle, L1, R1, R2)
+      (Cross, Circle, Square, L1, R1, R2)
     ),
     ps5: (
       ps5,
       PS5,
-      (Cross, Circle, L1, R1, R2)
+      (Cross, Circle, Square, L1, R1, R2)
     ),
     steam-deck: (
       steam-deck,
       SteamDeck,
-      (A, B, L1, R1, R2)
+      (A, B, X, L1, R1, R2)
     ),
     nintendo: (
       switch,
       Switch,
-      (A, B, LB, RB, RT)
+      (A, B, X, LB, RB, RT)
     )
   );
-  $button-classes: main-action, back, shoulder-l, shoulder-r, trigger-r;
+  $button-classes:
+    main-action, back, filter-toggle, shoulder-l, shoulder-r, trigger-r;
 
   @each $layout, $config in $layouts {
     $folder: list.nth($config, 1);

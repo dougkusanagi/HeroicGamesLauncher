@@ -28,6 +28,10 @@ export default function ControllerHints({
         {t('console.hints.sort', 'Sort')}
       </div>
       <div className="hint">
+        <i className="buttonImage filter-toggle" />
+        {t('console.hints.toggle_installed', 'Toggle installed')}
+      </div>
+      <div className="hint">
         <i className="buttonImage d-pad" />
         <i className="buttonImage left-stick" />
         {t('console.hints.navigate', 'Navigate')}

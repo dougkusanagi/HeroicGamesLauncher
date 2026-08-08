@@ -1264,7 +1264,8 @@
             "sort": "Ordenar",
             "navigate": "Navegar",
             "quit": "Fechar",
-            "change_store": "Mudar loja"
+            "change_store": "Mudar loja",
+            "toggle_installed": "Alternar filtro Instalado"
         },
         "launching": "Iniciando",
         "card": {

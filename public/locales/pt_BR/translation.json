@@ -1270,7 +1270,8 @@
             "sort": "Ordenar",
             "navigate": "Navegar",
             "quit": "Sair do Heroic",
-            "change_store": "Mudar de loja"
+            "change_store": "Mudar de loja",
+            "toggle_installed": "Alternar filtro Instalado"
         },
         "launching": "Lançamento",
         "card": {

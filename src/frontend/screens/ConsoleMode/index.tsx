@@ -33,6 +33,7 @@ import ControllerHints from './components/ControllerHints'
 import LaunchOverlay from './components/LaunchOverlay'
 import InstallOverlay from './InstallOverlay'
 import {
+  BTN_FILTER,
   BTN_L1,
   BTN_R1,
   BTN_R2,
@@ -600,6 +601,11 @@ export default function ConsoleMode() {
   useGamepadButtonPress(BTN_L1, () => cycleStore(-1), idle)
   useGamepadButtonPress(BTN_R1, () => cycleStore(1), idle)
   useGamepadButtonPress(BTN_R2, cycleSort, idle)
+  useGamepadButtonPress(
+    BTN_FILTER,
+    () => setFilteringByInstalled((current) => !current),
+    idle
+  )
 
   return (
     <div className={classNames('ConsoleMode', { launching: !!launchingGame })}>
