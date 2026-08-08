@@ -10,56 +10,94 @@ type Tone = {
 }
 
 const MASTER_GAIN = 0.12
-const MOVE_COOLDOWN_MS = 42
+const MOVE_COOLDOWN_MS = 72
 
 const tones: Record<ConsoleSound, Tone[]> = {
   move: [
     {
       at: 0,
-      duration: 0.055,
-      from: 520,
-      to: 680,
-      gain: 0.34
+      duration: 0.085,
+      from: 430,
+      to: 540,
+      gain: 0.22,
+      type: 'triangle'
+    },
+    {
+      at: 0.012,
+      duration: 0.12,
+      from: 760,
+      to: 1060,
+      gain: 0.14
+    },
+    {
+      at: 0.035,
+      duration: 0.14,
+      from: 1180,
+      to: 1480,
+      gain: 0.055
     }
   ],
   confirm: [
     {
       at: 0,
-      duration: 0.075,
-      from: 470,
-      to: 650,
-      gain: 0.32
+      duration: 0.095,
+      from: 430,
+      to: 600,
+      gain: 0.24,
+      type: 'triangle'
     },
     {
-      at: 0.045,
-      duration: 0.11,
-      from: 720,
-      to: 980,
-      gain: 0.25
+      at: 0.055,
+      duration: 0.16,
+      from: 680,
+      to: 940,
+      gain: 0.17
+    },
+    {
+      at: 0.09,
+      duration: 0.19,
+      from: 960,
+      to: 1240,
+      gain: 0.08
     }
   ],
   launch: [
     {
       at: 0,
-      duration: 0.12,
-      from: 220,
-      to: 360,
-      gain: 0.32,
+      duration: 0.34,
+      from: 105,
+      to: 170,
+      gain: 0.2,
       type: 'triangle'
     },
     {
-      at: 0.06,
-      duration: 0.16,
-      from: 400,
-      to: 740,
-      gain: 0.28
+      at: 0.035,
+      duration: 0.43,
+      from: 220,
+      to: 420,
+      gain: 0.16
     },
     {
-      at: 0.12,
-      duration: 0.22,
-      from: 680,
-      to: 1150,
-      gain: 0.22
+      at: 0.105,
+      duration: 0.56,
+      from: 420,
+      to: 860,
+      gain: 0.14,
+      type: 'triangle'
+    },
+    {
+      at: 0.17,
+      duration: 0.66,
+      from: 720,
+      to: 1420,
+      gain: 0.1
+    },
+    {
+      at: 0.32,
+      duration: 0.55,
+      from: 1040,
+      to: 1580,
+      gain: 0.065
     }
   ],
   back: [
@@ -114,6 +152,7 @@ const tones: Record<ConsoleSound, Tone[]> = {
 
 let audioContext: AudioContext | null = null
 let masterNode: GainNode | null = null
+let outputNode: DynamicsCompressorNode | null = null
 let lastMoveAt = 0
 
 function getAudioContext() {
@@ -122,7 +161,14 @@ function getAudioContext() {
     audioContext = new window.AudioContext()
     masterNode = audioContext.createGain()
     masterNode.gain.value = MASTER_GAIN
-    masterNode.connect(audioContext.destination)
+    outputNode = audioContext.createDynamicsCompressor()
+    outputNode.threshold.value = -25
+    outputNode.knee.value = 18
+    outputNode.ratio.value = 3
+    outputNode.attack.value = 0.004
+    outputNode.release.value = 0.18
+    masterNode.connect(outputNode)
+    outputNode.connect(audioContext.destination)
   }
   return audioContext
 }
@@ -148,8 +194,10 @@ function playTone(context: AudioContext, master: GainNode, tone: Tone) {
 }
 
 /**
- * Small, synthesized UI cues keep console mode responsive without adding
- * copyrighted or platform-specific sound assets.
+ * Layered, synthesized UI cues keep console mode responsive without adding
+ * copyrighted or platform-specific sound assets. Selection is deliberately
+ * short; launch has a longer, gently rising tail so it feels like a transition
+ * instead of a single confirmation beep.
  */
 export function playConsoleSound(sound: ConsoleSound) {
   const now = performance.now()
