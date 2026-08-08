@@ -272,6 +272,11 @@
         "launchErrorPrefix": "Failed to launch game:",
         "launching": "Launching",
         "loading": "Loading your library…",
+        "meta": {
+            "cloudSaves": "Cloud saves supported",
+            "playtimeHours": "{{hours}}h {{minutes}}m",
+            "playtimeMinutes": "{{minutes}}m"
+        },
         "quit": "Quit Console",
         "quitApp": "Quit App",
         "removeFromQueue": {

@@ -16,6 +16,10 @@ import ContextProvider from 'frontend/state/ContextProvider'
 import { sendKill, updateGame } from 'frontend/helpers'
 import { timestampStore } from 'frontend/helpers/electronStores'
 import HeroicIcon from 'frontend/assets/heroic-icon.svg?react'
+import PlayArrow from '@mui/icons-material/PlayArrow'
+import InfoOutlined from '@mui/icons-material/InfoOutlined'
+import { CachedImage } from 'frontend/components/UI'
+import fallBackImage from 'frontend/assets/heroic_card.jpg'
 
 import ConfirmDialog from './components/ConfirmDialog'
 import ConsoleCard from './components/ConsoleCard'
@@ -29,7 +33,7 @@ import {
   getActionButtonLabel,
   getBackButtonLabel
 } from './controller'
-import { useColumnCount, useGamepadButtonPress, useGamepadInfo } from './hooks'
+import { useGamepadButtonPress, useGamepadInfo } from './hooks'
 
 import type { TFunction } from 'i18next'
 import type { GameInfo, Runner } from 'common/types'
@@ -89,7 +93,8 @@ export default function ConsoleMode() {
     sideloadedLibrary,
     refreshLibrary,
     refreshing,
-    gameUpdates
+    gameUpdates,
+    hiddenGames
   } = useContext(ContextProvider)
 
   const [activeStore, setActiveStore] = useState<StoreKey>('all')
@@ -117,6 +122,8 @@ export default function ConsoleMode() {
   const cardRefs = useRef<Array<HTMLButtonElement | null>>([])
   const gridRef = useRef<HTMLDivElement | null>(null)
   const topBarRef = useRef<HTMLDivElement | null>(null)
+  const actionBarRef = useRef<HTMLDivElement | null>(null)
+  const primaryActionRef = useRef<HTMLButtonElement | null>(null)
 
   useEffect(() => {
     window.api.setFullscreen(true)
@@ -137,6 +144,7 @@ export default function ConsoleMode() {
   }, [])
 
   const allGames = useMemo<GameInfo[]>(() => {
+    const hiddenAppNames = new Set(hiddenGames.list.map((game) => game.appName))
     const all: GameInfo[] = [
       ...epic.library,
       ...gog.library,
@@ -145,14 +153,20 @@ export default function ConsoleMode() {
       ...zoom.library,
       ...sideloadedLibrary
     ]
-    return all.filter((g) => !g.install?.is_dlc && !g.thirdPartyManagedApp)
+    return all.filter(
+      (g) =>
+        !g.install?.is_dlc &&
+        !g.thirdPartyManagedApp &&
+        !hiddenAppNames.has(g.app_name)
+    )
   }, [
     epic.library,
     gog.library,
     amazon.library,
     steam.library,
     zoom.library,
-    sideloadedLibrary
+    sideloadedLibrary,
+    hiddenGames
   ])
 
   const visibleGames = useMemo(() => {
@@ -229,8 +243,6 @@ export default function ConsoleMode() {
     }
   }, [enabledStoreKeys, activeStore])
 
-  const columns = useColumnCount(cardRefs, visibleGames.length)
-
   useEffect(() => {
     // always make sane focused index
     if (focusedIndex >= visibleGames.length || focusedIndex < 0) {
@@ -246,8 +258,73 @@ export default function ConsoleMode() {
     if (document.activeElement !== btn) {
       btn.focus({ preventScroll: true })
     }
-    btn.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    btn.scrollIntoView({
+      block: 'nearest',
+      inline: 'center',
+      behavior: 'smooth'
+    })
   }, [focusedIndex, visibleGames.length])
+
+  const focusedGame = visibleGames[focusedIndex]
+  const focusedGameTitle = focusedGame?.overrides?.title || focusedGame?.title
+  const focusedGameDescription =
+    focusedGame?.extra?.about?.shortDescription ||
+    focusedGame?.extra?.about?.description ||
+    focusedGame?.description
+  const focusedGameGenres = focusedGame?.extra?.genres?.filter(Boolean) ?? []
+  const focusedGameStatus = focusedGame
+    ? libraryStatus.find((g) => g.appName === focusedGame.app_name)?.status
+    : undefined
+  const focusedGamePlaytime = focusedGame
+    ? timestampStore.get_nodefault(focusedGame.app_name)?.totalPlayed
+    : undefined
+
+  const focusedGameBackground =
+    focusedGame?.extra?.background ||
+    focusedGame?.art_background ||
+    focusedGame?.art_cover ||
+    focusedGame?.art_square ||
+    fallBackImage
+
+  const focusedGameActionLabel = focusedGame
+    ? focusedGameStatus === 'queued'
+      ? t('gamepage:button.queue.remove', 'Remove from Queue')
+      : focusedGameStatus === 'installing' || focusedGameStatus === 'updating'
+        ? t('button.cancel', 'Cancel')
+        : !focusedGame.is_installed
+          ? t('gamepage:button.install', 'Install')
+          : gameUpdates.includes(focusedGame.app_name)
+            ? t('gamepage:button.update', 'Update')
+            : t('gamepage:button.play', 'Play')
+    : ''
+
+  const focusedGameStatusLabel = (() => {
+    if (!focusedGameStatus) return undefined
+    const statusLabels: Record<string, string> = {
+      queued: t('gamepage:status.queued', 'Queued'),
+      installing: t('gamepage:status.downloading', 'Installing'),
+      updating: t('gamepage:status.updating', 'Updating'),
+      launching: t('gamepage:status.launching', 'Launching'),
+      playing: t('gamepage:status.playing', 'Playing'),
+      'syncing-saves': t('gamepage:status.syncingSaves', 'Syncing Saves')
+    }
+    return statusLabels[focusedGameStatus]
+  })()
+
+  const formatPlaytime = (minutes?: number) => {
+    if (!minutes) return null
+    const hours = Math.floor(minutes / 60)
+    const remainingMinutes = minutes % 60
+    if (hours > 0) {
+      return t('console.meta.playtimeHours', '{{hours}}h {{minutes}}m', {
+        hours,
+        minutes: remainingMinutes
+      })
+    }
+    return t('console.meta.playtimeMinutes', '{{minutes}}m', {
+      minutes: remainingMinutes
+    })
+  }
 
   const cycleStore = useCallback(
     (direction: 1 | -1) => {
@@ -385,24 +462,53 @@ export default function ConsoleMode() {
     } else if (e.key === 'ArrowDown') {
       e.preventDefault()
       e.stopPropagation()
-      setFocusedIndex((i) => Math.min(i + columns, last))
+      primaryActionRef.current?.focus()
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
       e.stopPropagation()
-      if (focusedIndex < columns) {
-        const first = topBarRef.current?.querySelector<HTMLButtonElement>(
-          'button:not(:disabled)'
-        )
-        first?.focus()
-      } else {
-        setFocusedIndex((i) => Math.max(i - columns, 0))
-      }
+      const first = topBarRef.current?.querySelector<HTMLButtonElement>(
+        'button:not(:disabled)'
+      )
+      first?.focus()
     } else if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
       const g = visibleGames[focusedIndex]
       if (g) activateGame(g)
     }
   }
+
+  const onActionBarKeyDown = (e: React.KeyboardEvent) => {
+    if (!idle || !focusedGame) return
+    const buttons = Array.from(
+      actionBarRef.current?.querySelectorAll<HTMLButtonElement>(
+        'button:not(:disabled)'
+      ) ?? []
+    )
+    const active = document.activeElement as HTMLButtonElement | null
+    const index = active ? buttons.indexOf(active) : -1
+
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      if (buttons.length === 0 || index < 0) return
+      e.preventDefault()
+      e.stopPropagation()
+      const delta = e.key === 'ArrowRight' ? 1 : -1
+      buttons[(index + delta + buttons.length) % buttons.length]?.focus()
+      return
+    }
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      e.stopPropagation()
+      cardRefs.current[focusedIndex]?.focus()
+    }
+  }
+
+  const openGameDetails = useCallback(() => {
+    if (!focusedGame) return
+    navigate(`/gamepage/${focusedGame.runner}/${focusedGame.app_name}`, {
+      state: { gameInfo: focusedGame }
+    })
+  }, [focusedGame, navigate])
 
   // Esc quits when idle. While a game is launching or a dialog is open,
   // the overlay/dialog handles Esc itself.
@@ -438,18 +544,31 @@ export default function ConsoleMode() {
 
   return (
     <div className={classNames('ConsoleMode', { launching: !!launchingGame })}>
+      {focusedGame && (
+        <div className="consoleBackdrop" aria-hidden="true">
+          <CachedImage
+            key={`${focusedGame.runner}-${focusedGame.app_name}`}
+            src={focusedGameBackground}
+            fallback={fallBackImage}
+            className="consoleBackdropArt"
+            alt=""
+          />
+          <div className="consoleBackdropShade" />
+        </div>
+      )}
+
       <div
         className="consoleTopBar"
         ref={topBarRef}
         onKeyDown={onTopBarKeyDown}
       >
-        <HeroicIcon className="consoleLogo" />
         <div className="consoleFilters">
           <button
             key={'installedGames'}
             className={classNames('consoleChip', {
               active: filteringByInstalled
             })}
+            aria-pressed={filteringByInstalled}
             onClick={() => setFilteringByInstalled(!filteringByInstalled)}
           >
             {t('status.installed', 'Installed')}
@@ -463,6 +582,7 @@ export default function ConsoleMode() {
                 className={classNames('consoleChip', {
                   active: activeStore === f.key
                 })}
+                aria-current={activeStore === f.key ? 'page' : undefined}
                 onClick={() => setActiveStore(f.key)}
                 disabled={!!launchingGame}
               >
@@ -494,14 +614,10 @@ export default function ConsoleMode() {
             {t('console.quitApp', 'Quit App')}
           </button>
         </div>
-      </div>
-
-      <div className="consoleTitleBar">
-        {visibleGames[focusedIndex] && (
-          <h1 className="consoleFocusTitle">
-            {visibleGames[focusedIndex].title}
-          </h1>
-        )}
+        <div className="consoleBrand" aria-label="Heroic Games Launcher">
+          <HeroicIcon className="consoleLogo" />
+          <span className="consoleWordmark">HEROIC</span>
+        </div>
       </div>
 
       <div className="consoleStage">
@@ -515,40 +631,125 @@ export default function ConsoleMode() {
                 )}
           </div>
         ) : (
-          <div
-            className="consoleGridScroller"
-            ref={gridRef}
-            role="listbox"
-            aria-label={t('console.games', 'Installed games')}
-            onKeyDown={onGridKeyDown}
-          >
-            <div className="consoleGrid">
-              {visibleGames.map((game, i) => {
-                const isFocused = i === focusedIndex
-                return (
-                  <ConsoleCard
-                    key={`${game.runner}-${game.app_name}`}
-                    ref={(el) => {
-                      cardRefs.current[i] = el
-                    }}
-                    game={game}
-                    focused={isFocused}
-                    needsUpdate={gameUpdates.includes(game.app_name)}
-                    onClick={() => {
-                      if (isFocused) activateGame(game)
-                      else setFocusedIndex(i)
-                    }}
-                    // A scroll can move a card under a stationary pointer and
-                    // fire mouseenter. Only real pointer movement should
-                    // change selection, otherwise smooth scrolling can undo
-                    // a controller navigation immediately.
-                    onMouseMove={() => setFocusedIndex(i)}
-                    onFocus={() => setFocusedIndex(i)}
-                  />
-                )
-              })}
+          <>
+            <div
+              className="consoleGridScroller"
+              ref={gridRef}
+              role="listbox"
+              aria-label={t('console.games', 'Installed games')}
+              onKeyDown={onGridKeyDown}
+            >
+              <div className="consoleGrid">
+                {visibleGames.map((game, i) => {
+                  const isFocused = i === focusedIndex
+                  return (
+                    <ConsoleCard
+                      key={`${game.runner}-${game.app_name}`}
+                      ref={(el) => {
+                        cardRefs.current[i] = el
+                      }}
+                      game={game}
+                      focused={isFocused}
+                      needsUpdate={gameUpdates.includes(game.app_name)}
+                      onClick={() => {
+                        if (isFocused) activateGame(game)
+                        else setFocusedIndex(i)
+                      }}
+                      // A scroll can move a card under a stationary pointer and
+                      // fire mouseenter. Only real pointer movement should
+                      // change selection, otherwise smooth scrolling can undo
+                      // a controller navigation immediately.
+                      onMouseMove={() => setFocusedIndex(i)}
+                      onFocus={() => setFocusedIndex(i)}
+                    />
+                  )
+                })}
+              </div>
             </div>
-          </div>
+
+            {focusedGame && (
+              <section className="consoleHero" aria-label={focusedGameTitle}>
+                <div className="consoleHeroCopy">
+                  {focusedGame.art_logo ? (
+                    <CachedImage
+                      key={focusedGame.art_logo}
+                      src={focusedGame.art_logo}
+                      className="consoleHeroLogo"
+                      alt={focusedGameTitle}
+                    />
+                  ) : (
+                    <h1 className="consoleHeroTitle">{focusedGameTitle}</h1>
+                  )}
+
+                  <div className="consoleHeroMeta">
+                    {focusedGameGenres.length > 0 && (
+                      <span>{focusedGameGenres.slice(0, 3).join('  •  ')}</span>
+                    )}
+                    {focusedGame.developer && (
+                      <span>{focusedGame.developer}</span>
+                    )}
+                  </div>
+
+                  {focusedGameDescription && (
+                    <p className="consoleHeroDescription">
+                      {focusedGameDescription}
+                    </p>
+                  )}
+
+                  <div className="consoleHeroFacts">
+                    {formatPlaytime(focusedGamePlaytime) && (
+                      <span>
+                        <span className="consoleFactIcon" aria-hidden="true">
+                          ◷
+                        </span>
+                        {formatPlaytime(focusedGamePlaytime)}
+                      </span>
+                    )}
+                    {focusedGame.cloud_save_enabled && (
+                      <span>
+                        <span className="consoleFactIcon" aria-hidden="true">
+                          ☁
+                        </span>
+                        {t('console.meta.cloudSaves', 'Cloud saves supported')}
+                      </span>
+                    )}
+                    {focusedGameStatusLabel && (
+                      <span className="consoleHeroStatus">
+                        {focusedGameStatusLabel}
+                      </span>
+                    )}
+                  </div>
+
+                  <div
+                    className="consoleHeroActions"
+                    ref={actionBarRef}
+                    onKeyDown={onActionBarKeyDown}
+                  >
+                    <button
+                      ref={primaryActionRef}
+                      className="consolePrimaryAction"
+                      onClick={() => activateGame(focusedGame)}
+                      disabled={!idle}
+                    >
+                      <PlayArrow aria-hidden="true" />
+                      <span>{focusedGameActionLabel}</span>
+                      <kbd>
+                        {gamepadConnected ? actionButtonLabel : 'Enter'}
+                      </kbd>
+                    </button>
+                    <button
+                      className="consoleSecondaryAction"
+                      onClick={openGameDetails}
+                      disabled={!idle}
+                    >
+                      <InfoOutlined aria-hidden="true" />
+                      <span>{t('gamepage:button.details', 'Details')}</span>
+                    </button>
+                  </div>
+                </div>
+              </section>
+            )}
+          </>
         )}
       </div>
 

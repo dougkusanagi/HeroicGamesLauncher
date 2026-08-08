@@ -1284,6 +1284,11 @@
         "games": "Jogos instalados",
         "quitApp": "Fechar o App",
         "loading": "Carregando sua biblioteca…",
+        "meta": {
+            "cloudSaves": "Salvamentos na nuvem disponíveis",
+            "playtimeHours": "{{hours}}h {{minutes}}min",
+            "playtimeMinutes": "{{minutes}}min"
+        },
         "cancelInstall": {
             "title": "Cancelar instalação?",
             "message": "Este jogo está sendo instalado no momento. Cancelar a instalação?"
