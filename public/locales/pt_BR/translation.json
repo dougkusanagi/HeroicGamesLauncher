@@ -1283,6 +1283,8 @@
         "empty": "Não há nenhum jogo instalado. Instale algum primeiro.",
         "games": "Jogos instalados",
         "quitApp": "Fechar o App",
+        "nextGame": "Próximo jogo",
+        "previousGame": "Jogo anterior",
         "loading": "Carregando sua biblioteca…",
         "meta": {
             "cloudSaves": "Salvamentos na nuvem disponíveis",
@@ -1305,6 +1307,9 @@
             "message": "Este jogo está sendo baixado no momento. Cancelar a atualização?",
             "title": "Cancelar a atualização?"
         },
+        "sortAlphaAsc": "A → Z",
+        "sortAlphaDesc": "Z → A",
+        "sortLastPlayed": "Últimos jogados",
         "removeFromQueue": {
             "message": "Este jogo está na fila de download. Removê-lo da fila?"
         }

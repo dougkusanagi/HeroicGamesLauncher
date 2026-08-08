@@ -319,6 +319,70 @@
   text-align: center;
 }
 
+.consoleCarousel {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+}
+
+.consoleCarouselArrow {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  display: grid;
+  width: clamp(38px, 3.2vw, 54px);
+  height: clamp(54px, 8vh, 78px);
+  align-items: center;
+  justify-items: center;
+  border: 1px solid rgba(245, 246, 247, 0.24);
+  border-radius: 999px;
+  background: rgba(8, 10, 12, 0.78);
+  color: var(--console-text);
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.36);
+  transform: translateY(-50%);
+  transition:
+    background 150ms ease,
+    border-color 150ms ease,
+    opacity 150ms ease,
+    transform 150ms ease;
+
+  svg {
+    font-size: clamp(1.6rem, 2.2vw, 2.25rem);
+  }
+
+  &.previous {
+    left: clamp(10px, 1.4vw, 26px);
+  }
+
+  &.next {
+    right: clamp(10px, 1.4vw, 26px);
+  }
+
+  &:hover,
+  &:focus-visible {
+    border-color: color-mix(in srgb, var(--console-accent) 72%, transparent);
+    outline: none;
+    background: color-mix(
+      in srgb,
+      var(--console-accent) 28%,
+      rgba(8, 10, 12, 0.9)
+    );
+    transform: translateY(-50%) scale(1.04);
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba(255, 255, 255, 0.92);
+    outline-offset: 3px;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.24;
+    pointer-events: none;
+  }
+}
+
 .consoleGridScroller {
   min-width: 0;
   min-height: 0;
@@ -557,7 +621,7 @@
 .consoleHeroActions {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: stretch;
   gap: 12px;
   margin-top: clamp(18px, 2.8vh, 30px);
 }
@@ -568,7 +632,9 @@
   align-items: center;
   justify-content: center;
   gap: 9px;
+  height: 44px;
   min-height: 44px;
+  white-space: nowrap;
   border-radius: 8px;
   cursor: pointer;
   font-family: inherit;

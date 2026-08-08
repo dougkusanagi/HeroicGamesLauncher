@@ -277,12 +277,17 @@
             "playtimeHours": "{{hours}}h {{minutes}}m",
             "playtimeMinutes": "{{minutes}}m"
         },
+        "nextGame": "Next game",
+        "previousGame": "Previous game",
         "quit": "Quit Console",
         "quitApp": "Quit App",
         "removeFromQueue": {
             "message": "This game is queued for download. Remove it from the queue?"
         },
-        "sort": "Sort"
+        "sort": "Sort",
+        "sortAlphaAsc": "A → Z",
+        "sortAlphaDesc": "Z → A",
+        "sortLastPlayed": "Last Played"
     },
     "controller": {
         "hints": {

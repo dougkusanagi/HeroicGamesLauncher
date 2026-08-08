@@ -18,6 +18,8 @@ import { timestampStore } from 'frontend/helpers/electronStores'
 import HeroicIcon from 'frontend/assets/heroic-icon.svg?react'
 import PlayArrow from '@mui/icons-material/PlayArrow'
 import InfoOutlined from '@mui/icons-material/InfoOutlined'
+import ChevronLeft from '@mui/icons-material/ChevronLeft'
+import ChevronRight from '@mui/icons-material/ChevronRight'
 import { CachedImage } from 'frontend/components/UI'
 import fallBackImage from 'frontend/assets/heroic_card.jpg'
 
@@ -49,9 +51,9 @@ const SORT_MODE_ORDER: ConsoleSortMode[] = [
 ]
 
 const SORT_MODE_LABEL: Record<ConsoleSortMode, string> = {
-  last_played: 'console.sort.last_played',
-  alpha_asc: 'console.sort.alpha_asc',
-  alpha_desc: 'console.sort.alpha_desc'
+  last_played: 'console.sortLastPlayed',
+  alpha_asc: 'console.sortAlphaAsc',
+  alpha_desc: 'console.sortAlphaDesc'
 }
 
 const SORT_MODE_DEFAULT: Record<ConsoleSortMode, string> = {
@@ -447,18 +449,27 @@ export default function ConsoleMode() {
     }
   }
 
+  const moveFocus = useCallback(
+    (direction: 1 | -1) => {
+      if (!idle || visibleGames.length === 0) return
+      setFocusedIndex((index) =>
+        Math.max(0, Math.min(index + direction, visibleGames.length - 1))
+      )
+    },
+    [idle, visibleGames.length]
+  )
+
   const onGridKeyDown = (e: React.KeyboardEvent) => {
     if (visibleGames.length === 0 || !idle) return
-    const last = visibleGames.length - 1
 
     if (e.key === 'ArrowRight') {
       e.preventDefault()
       e.stopPropagation()
-      setFocusedIndex((i) => Math.min(i + 1, last))
+      moveFocus(1)
     } else if (e.key === 'ArrowLeft') {
       e.preventDefault()
       e.stopPropagation()
-      setFocusedIndex((i) => Math.max(i - 1, 0))
+      moveFocus(-1)
     } else if (e.key === 'ArrowDown') {
       e.preventDefault()
       e.stopPropagation()
@@ -563,17 +574,6 @@ export default function ConsoleMode() {
         onKeyDown={onTopBarKeyDown}
       >
         <div className="consoleFilters">
-          <button
-            key={'installedGames'}
-            className={classNames('consoleChip', {
-              active: filteringByInstalled
-            })}
-            aria-pressed={filteringByInstalled}
-            onClick={() => setFilteringByInstalled(!filteringByInstalled)}
-          >
-            {t('status.installed', 'Installed')}
-          </button>
-          <div className="consoleDividerVertical" />
           {storeFilters
             .filter((f) => f.enabled)
             .map((f) => (
@@ -591,6 +591,16 @@ export default function ConsoleMode() {
             ))}
         </div>
         <div className="consoleTopRight">
+          <button
+            className={classNames('consoleChip', {
+              active: filteringByInstalled
+            })}
+            aria-pressed={filteringByInstalled}
+            onClick={() => setFilteringByInstalled(!filteringByInstalled)}
+            disabled={!!launchingGame}
+          >
+            {t('status.installed', 'Installed')}
+          </button>
           <button
             className="consoleChip"
             onClick={cycleSort}
@@ -632,39 +642,54 @@ export default function ConsoleMode() {
           </div>
         ) : (
           <>
-            <div
-              className="consoleGridScroller"
-              ref={gridRef}
-              role="listbox"
-              aria-label={t('console.games', 'Installed games')}
-              onKeyDown={onGridKeyDown}
-            >
-              <div className="consoleGrid">
-                {visibleGames.map((game, i) => {
-                  const isFocused = i === focusedIndex
-                  return (
-                    <ConsoleCard
-                      key={`${game.runner}-${game.app_name}`}
-                      ref={(el) => {
-                        cardRefs.current[i] = el
-                      }}
-                      game={game}
-                      focused={isFocused}
-                      needsUpdate={gameUpdates.includes(game.app_name)}
-                      onClick={() => {
-                        if (isFocused) activateGame(game)
-                        else setFocusedIndex(i)
-                      }}
-                      // A scroll can move a card under a stationary pointer and
-                      // fire mouseenter. Only real pointer movement should
-                      // change selection, otherwise smooth scrolling can undo
-                      // a controller navigation immediately.
-                      onMouseMove={() => setFocusedIndex(i)}
-                      onFocus={() => setFocusedIndex(i)}
-                    />
-                  )
-                })}
+            <div className="consoleCarousel">
+              <button
+                type="button"
+                className="consoleCarouselArrow previous"
+                aria-label={t('console.previousGame', 'Previous game')}
+                onClick={() => moveFocus(-1)}
+                disabled={!idle || focusedIndex <= 0}
+              >
+                <ChevronLeft aria-hidden="true" />
+              </button>
+              <div
+                className="consoleGridScroller"
+                ref={gridRef}
+                role="listbox"
+                aria-label={t('console.games', 'Installed games')}
+                onKeyDown={onGridKeyDown}
+              >
+                <div className="consoleGrid">
+                  {visibleGames.map((game, i) => {
+                    const isFocused = i === focusedIndex
+                    return (
+                      <ConsoleCard
+                        key={`${game.runner}-${game.app_name}`}
+                        ref={(el) => {
+                          cardRefs.current[i] = el
+                        }}
+                        game={game}
+                        focused={isFocused}
+                        needsUpdate={gameUpdates.includes(game.app_name)}
+                        onClick={() => {
+                          if (isFocused) activateGame(game)
+                          else setFocusedIndex(i)
+                        }}
+                        onFocus={() => setFocusedIndex(i)}
+                      />
+                    )
+                  })}
+                </div>
               </div>
+              <button
+                type="button"
+                className="consoleCarouselArrow next"
+                aria-label={t('console.nextGame', 'Next game')}
+                onClick={() => moveFocus(1)}
+                disabled={!idle || focusedIndex >= visibleGames.length - 1}
+              >
+                <ChevronRight aria-hidden="true" />
+              </button>
             </div>
 
             {focusedGame && (
