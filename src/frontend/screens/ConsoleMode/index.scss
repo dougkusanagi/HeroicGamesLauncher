@@ -593,8 +593,10 @@
   display: block;
   width: min(100%, 540px);
   height: clamp(68px, 13vh, 132px);
-  object-fit: cover;
-  object-position: center center;
+  // Logos can contain important artwork outside their visual wordmark.
+  // Contain is intentional here: never crop a game's logo to make it larger.
+  object-fit: contain;
+  object-position: left center;
   filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.52));
   animation: titleFade 200ms ease;
 }
