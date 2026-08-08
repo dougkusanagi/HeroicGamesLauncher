@@ -566,14 +566,14 @@
 }
 
 .consoleHeroCopy {
-  width: min(100%, 650px);
+  width: min(100%, 720px);
   min-width: 0;
 }
 
 .consoleHeroLogo {
   display: block;
-  width: min(100%, 390px);
-  height: clamp(52px, 10vh, 94px);
+  width: min(100%, 540px);
+  height: clamp(68px, 13vh, 132px);
   object-fit: contain;
   object-position: left center;
   filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.52));
@@ -961,7 +961,7 @@
   }
 
   .consoleHeroLogo {
-    height: 54px;
+    height: 68px;
   }
 
   .consoleHeroDescription {
