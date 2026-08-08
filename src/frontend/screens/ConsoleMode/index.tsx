@@ -40,6 +40,7 @@ import {
   getActionButtonLabel,
   getBackButtonLabel
 } from './controller'
+import { playConsoleSound } from './audio'
 import { useGamepadButtonPress, useGamepadInfo } from './hooks'
 
 import type { TFunction } from 'i18next'
@@ -131,6 +132,7 @@ export default function ConsoleMode() {
   const topBarRef = useRef<HTMLDivElement | null>(null)
   const actionBarRef = useRef<HTMLDivElement | null>(null)
   const primaryActionRef = useRef<HTMLButtonElement | null>(null)
+  const previousFocusedGameKeyRef = useRef<string | null>(null)
 
   useEffect(() => {
     window.api.setFullscreen(true)
@@ -273,6 +275,18 @@ export default function ConsoleMode() {
   }, [focusedIndex, visibleGames.length])
 
   const focusedGame = visibleGames[focusedIndex]
+  const focusedGameKey = focusedGame
+    ? `${focusedGame.runner}-${focusedGame.app_name}`
+    : null
+
+  useEffect(() => {
+    const previousKey = previousFocusedGameKeyRef.current
+    previousFocusedGameKeyRef.current = focusedGameKey
+    if (previousKey && focusedGameKey && previousKey !== focusedGameKey) {
+      playConsoleSound('move')
+    }
+  }, [focusedGameKey])
+
   const focusedGameTitle = focusedGame?.overrides?.title || focusedGame?.title
   const focusedGameDescription =
     focusedGame?.extra?.about?.shortDescription ||
@@ -383,12 +397,30 @@ export default function ConsoleMode() {
       const idx = enabledStoreKeys.indexOf(activeStore)
       const next =
         (idx + direction + enabledStoreKeys.length) % enabledStoreKeys.length
+      playConsoleSound('filter')
       setActiveStore(enabledStoreKeys[next])
     },
     [enabledStoreKeys, activeStore]
   )
 
-  const quit = useCallback(() => navigate('/'), [navigate])
+  const selectStore = useCallback(
+    (store: StoreKey) => {
+      if (store === activeStore) return
+      playConsoleSound('filter')
+      setActiveStore(store)
+    },
+    [activeStore]
+  )
+
+  const toggleInstalledFilter = useCallback(() => {
+    playConsoleSound('filter')
+    setFilteringByInstalled((current) => !current)
+  }, [])
+
+  const quit = useCallback(() => {
+    playConsoleSound('back')
+    navigate('/')
+  }, [navigate])
 
   const idle =
     !launchingGame &&
@@ -404,25 +436,31 @@ export default function ConsoleMode() {
         (g) => g.appName === game.app_name
       )?.status
       if (status === 'queued') {
+        playConsoleSound('confirm')
         setQueuedNoticeGame(game)
         return
       }
       if (status === 'installing') {
+        playConsoleSound('confirm')
         setCancelDownloadGame({ game, kind: 'install' })
         return
       }
       if (status === 'updating') {
+        playConsoleSound('confirm')
         setCancelDownloadGame({ game, kind: 'update' })
         return
       }
       if (!game.is_installed) {
+        playConsoleSound('confirm')
         setInstallingGame(game)
         return
       }
       if (gameUpdates.includes(game.app_name)) {
+        playConsoleSound('confirm')
         setUpdateNoticeGame(game)
         return
       }
+      playConsoleSound('launch')
       setLaunchingGame(game)
     },
     [idle, libraryStatus, gameUpdates]
@@ -565,6 +603,7 @@ export default function ConsoleMode() {
 
   const openGameDetails = useCallback(() => {
     if (!focusedGame) return
+    playConsoleSound('confirm')
     navigate(`/gamepage/${focusedGame.runner}/${focusedGame.app_name}`, {
       state: { gameInfo: focusedGame }
     })
@@ -591,6 +630,7 @@ export default function ConsoleMode() {
   }, [launchingGame])
 
   const cycleSort = useCallback(() => {
+    playConsoleSound('sort')
     setSortMode((current) => {
       const idx = SORT_MODE_ORDER.indexOf(current)
       const next = (idx + 1) % SORT_MODE_ORDER.length
@@ -601,11 +641,7 @@ export default function ConsoleMode() {
   useGamepadButtonPress(BTN_L1, () => cycleStore(-1), idle)
   useGamepadButtonPress(BTN_R1, () => cycleStore(1), idle)
   useGamepadButtonPress(BTN_R2, cycleSort, idle)
-  useGamepadButtonPress(
-    BTN_FILTER,
-    () => setFilteringByInstalled((current) => !current),
-    idle
-  )
+  useGamepadButtonPress(BTN_FILTER, toggleInstalledFilter, idle)
 
   return (
     <div className={classNames('ConsoleMode', { launching: !!launchingGame })}>
@@ -637,7 +673,7 @@ export default function ConsoleMode() {
                   active: activeStore === f.key
                 })}
                 aria-current={activeStore === f.key ? 'page' : undefined}
-                onClick={() => setActiveStore(f.key)}
+                onClick={() => selectStore(f.key)}
                 disabled={!!launchingGame}
               >
                 {f.label}
@@ -650,7 +686,7 @@ export default function ConsoleMode() {
               active: filteringByInstalled
             })}
             aria-pressed={filteringByInstalled}
-            onClick={() => setFilteringByInstalled(!filteringByInstalled)}
+            onClick={toggleInstalledFilter}
             disabled={!!launchingGame}
           >
             {t('console.filter.installed', 'Installed')}
