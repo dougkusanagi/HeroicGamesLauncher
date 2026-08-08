@@ -14,37 +14,46 @@ type Tone = {
   pan?: number
 }
 
-type Noise = {
-  at: number
-  duration: number
-  gain: number
-  filterFrom: number
-  filterTo: number
-}
-
-const MASTER_GAIN = 0.12
+const MASTER_GAIN = 0.1
 const MOVE_COOLDOWN_MS = 72
 
 const tones: Record<ConsoleSound, Tone[]> = {
   move: [
     {
       at: 0,
-      duration: 0.075,
-      from: 520,
-      to: 610,
-      gain: 0.17,
-      filterFrom: 2200,
-      filterTo: 3000,
-      type: 'sine'
+      duration: 0.085,
+      from: 523.25,
+      to: 535,
+      gain: 0.14,
+      filterFrom: 1500,
+      filterTo: 2100,
+      attack: 0.004,
+      release: 0.065,
+      pan: -0.08,
+      type: 'square'
     },
     {
-      at: 0.018,
-      duration: 0.135,
-      from: 780,
-      to: 920,
-      gain: 0.09,
-      filterFrom: 2800,
-      filterTo: 3600,
+      at: 0.038,
+      duration: 0.11,
+      from: 783.99,
+      to: 795,
+      gain: 0.105,
+      filterFrom: 1700,
+      filterTo: 2500,
+      attack: 0.004,
+      release: 0.08,
+      pan: 0.06,
+      type: 'square'
+    },
+    {
+      at: 0.078,
+      duration: 0.17,
+      from: 1046.5,
+      to: 1058,
+      gain: 0.05,
+      filterFrom: 2200,
+      filterTo: 3000,
+      release: 0.12,
       type: 'triangle'
     }
   ],
@@ -52,97 +61,148 @@ const tones: Record<ConsoleSound, Tone[]> = {
     {
       at: 0,
       duration: 0.1,
-      from: 430,
-      to: 520,
-      gain: 0.2,
-      filterFrom: 2200,
-      filterTo: 3000,
-      type: 'triangle'
+      from: 523.25,
+      to: 535,
+      gain: 0.15,
+      filterFrom: 1600,
+      filterTo: 2300,
+      type: 'square'
     },
     {
       at: 0.055,
-      duration: 0.17,
-      from: 650,
-      to: 780,
-      gain: 0.13,
-      filterFrom: 2600,
-      filterTo: 3600
+      duration: 0.14,
+      from: 659.25,
+      to: 670,
+      gain: 0.12,
+      filterFrom: 1800,
+      filterTo: 2600,
+      pan: 0.04,
+      type: 'square'
     },
     {
       at: 0.12,
-      duration: 0.23,
-      from: 975,
-      to: 1170,
-      gain: 0.065,
-      filterFrom: 3000,
-      filterTo: 4200
+      duration: 0.22,
+      from: 783.99,
+      to: 796,
+      gain: 0.09,
+      filterFrom: 2200,
+      filterTo: 3200,
+      release: 0.14,
+      pan: -0.04,
+      type: 'triangle'
     }
   ],
   launch: [
     {
       at: 0,
-      duration: 0.3,
-      from: 98,
-      to: 131,
-      gain: 0.15,
-      filterFrom: 900,
-      filterTo: 1300,
+      duration: 0.38,
+      from: 130.81,
+      to: 130.81,
+      gain: 0.13,
+      filterFrom: 700,
+      filterTo: 1100,
       type: 'triangle'
     },
     {
-      at: 0.035,
-      duration: 0.43,
-      from: 196,
-      to: 233,
-      gain: 0.105,
-      filterFrom: 1500,
-      filterTo: 2300
+      at: 0.02,
+      duration: 0.18,
+      from: 261.63,
+      to: 266,
+      gain: 0.095,
+      filterFrom: 1300,
+      filterTo: 1900,
+      pan: -0.08,
+      type: 'square'
     },
     {
-      at: 0.08,
-      duration: 0.52,
-      from: 294,
-      to: 349,
-      gain: 0.105,
-      filterFrom: 1800,
-      filterTo: 2900,
-      type: 'triangle'
-    },
-    {
-      at: 0.15,
-      duration: 0.64,
-      from: 392,
-      to: 466,
+      at: 0.11,
+      duration: 0.2,
+      from: 329.63,
+      to: 334,
       gain: 0.09,
-      filterFrom: 2200,
-      filterTo: 3400
+      filterFrom: 1500,
+      filterTo: 2200,
+      pan: 0.08,
+      type: 'square'
     },
     {
-      at: 0.23,
-      duration: 0.76,
-      from: 587,
-      to: 698,
+      at: 0.2,
+      duration: 0.23,
+      from: 392,
+      to: 397,
+      gain: 0.085,
+      filterFrom: 1700,
+      filterTo: 2500,
+      pan: -0.06,
+      type: 'square'
+    },
+    {
+      at: 0.31,
+      duration: 0.27,
+      from: 523.25,
+      to: 529,
+      gain: 0.08,
+      filterFrom: 1900,
+      filterTo: 2800,
+      pan: 0.06,
+      type: 'square'
+    },
+    {
+      at: 0.43,
+      duration: 0.31,
+      from: 659.25,
+      to: 666,
       gain: 0.07,
+      filterFrom: 2200,
+      filterTo: 3100,
+      pan: -0.04,
+      type: 'square'
+    },
+    {
+      at: 0.55,
+      duration: 0.38,
+      from: 783.99,
+      to: 792,
+      gain: 0.06,
+      filterFrom: 2400,
+      filterTo: 3400,
+      pan: 0.04,
+      type: 'square'
+    },
+    {
+      at: 0.67,
+      duration: 0.62,
+      from: 1046.5,
+      to: 1046.5,
+      gain: 0.065,
       filterFrom: 2600,
-      filterTo: 4000
+      filterTo: 3600,
+      release: 0.2,
+      type: 'triangle'
     },
     {
-      at: 0.4,
-      duration: 0.78,
-      from: 784,
-      to: 932,
-      gain: 0.045,
-      filterFrom: 3000,
-      filterTo: 4600
+      at: 0.67,
+      duration: 0.64,
+      from: 523.25,
+      to: 523.25,
+      gain: 0.035,
+      filterFrom: 2200,
+      filterTo: 3200,
+      release: 0.2,
+      pan: -0.08,
+      type: 'sine'
     },
     {
-      at: 0.52,
-      duration: 0.72,
-      from: 1046,
-      to: 1046,
-      gain: 0.04,
-      filterFrom: 3200,
-      filterTo: 4200
+      at: 0.67,
+      duration: 0.64,
+      from: 659.25,
+      to: 659.25,
+      gain: 0.032,
+      filterFrom: 2400,
+      filterTo: 3400,
+      release: 0.2,
+      pan: 0.08,
+      type: 'sine'
     }
   ],
   back: [
@@ -195,18 +255,6 @@ const tones: Record<ConsoleSound, Tone[]> = {
   ]
 }
 
-const noise: Partial<Record<ConsoleSound, Noise[]>> = {
-  launch: [
-    {
-      at: 0.12,
-      duration: 0.86,
-      gain: 0.035,
-      filterFrom: 700,
-      filterTo: 3600
-    }
-  ]
-}
-
 let audioContext: AudioContext | null = null
 let masterNode: GainNode | null = null
 let outputNode: DynamicsCompressorNode | null = null
@@ -224,7 +272,19 @@ function getAudioContext() {
     outputNode.ratio.value = 3
     outputNode.attack.value = 0.004
     outputNode.release.value = 0.18
+    const delayNode = audioContext.createDelay(0.6)
+    const delayFeedback = audioContext.createGain()
+    const delayWet = audioContext.createGain()
+    delayNode.delayTime.value = 0.17
+    delayFeedback.gain.value = 0.2
+    delayWet.gain.value = 0.16
+
     masterNode.connect(outputNode)
+    masterNode.connect(delayNode)
+    delayNode.connect(delayFeedback)
+    delayFeedback.connect(delayNode)
+    delayNode.connect(delayWet)
+    delayWet.connect(outputNode)
     outputNode.connect(audioContext.destination)
   }
   return audioContext
@@ -243,10 +303,14 @@ function playTone(context: AudioContext, master: GainNode, tone: Tone) {
 
   oscillator.type = tone.type ?? 'sine'
   oscillator.frequency.setValueAtTime(tone.from, start)
-  oscillator.frequency.exponentialRampToValueAtTime(tone.to, end)
+  if (tone.from === tone.to) {
+    oscillator.frequency.setValueAtTime(tone.to, end)
+  } else {
+    oscillator.frequency.exponentialRampToValueAtTime(tone.to, end)
+  }
 
   filter.type = 'lowpass'
-  filter.Q.value = 0.55
+  filter.Q.value = 0.7
   filter.frequency.setValueAtTime(tone.filterFrom ?? 3200, start)
   filter.frequency.exponentialRampToValueAtTime(tone.filterTo ?? 4200, end)
 
@@ -264,43 +328,11 @@ function playTone(context: AudioContext, master: GainNode, tone: Tone) {
   oscillator.stop(end + 0.02)
 }
 
-function playNoise(context: AudioContext, master: GainNode, effect: Noise) {
-  const sampleCount = Math.ceil(context.sampleRate * effect.duration)
-  const buffer = context.createBuffer(1, sampleCount, context.sampleRate)
-  const samples = buffer.getChannelData(0)
-
-  for (let index = 0; index < sampleCount; index += 1) {
-    samples[index] = Math.random() * 2 - 1
-  }
-
-  const source = context.createBufferSource()
-  const filter = context.createBiquadFilter()
-  const envelope = context.createGain()
-  const start = context.currentTime + effect.at
-  const end = start + effect.duration
-
-  filter.type = 'lowpass'
-  filter.Q.value = 0.35
-  filter.frequency.setValueAtTime(effect.filterFrom, start)
-  filter.frequency.exponentialRampToValueAtTime(effect.filterTo, end)
-
-  envelope.gain.setValueAtTime(0.0001, start)
-  envelope.gain.exponentialRampToValueAtTime(effect.gain, start + 0.08)
-  envelope.gain.exponentialRampToValueAtTime(0.0001, end)
-
-  source.buffer = buffer
-  source.connect(filter)
-  filter.connect(envelope)
-  envelope.connect(master)
-  source.start(start)
-  source.stop(end + 0.02)
-}
-
 /**
- * Layered, synthesized UI cues keep console mode responsive without adding
- * copyrighted or platform-specific sound assets. Selection is deliberately
- * short; launch has a longer, gently rising tail so it feels like a transition
- * instead of a single confirmation beep.
+ * Chiptune-inspired, synthesized UI cues keep console mode responsive without
+ * adding copyrighted or platform-specific sound assets. Pulse and triangle
+ * voices give the cues a classic-game character, while the filtered echo keeps
+ * them rounded instead of dry.
  */
 export function playConsoleSound(sound: ConsoleSound) {
   const now = performance.now()
@@ -312,6 +344,4 @@ export function playConsoleSound(sound: ConsoleSound) {
 
   void context.resume().catch(() => {})
   for (const tone of tones[sound]) playTone(context, masterNode, tone)
-  for (const effect of noise[sound] ?? [])
-    playNoise(context, masterNode, effect)
 }
