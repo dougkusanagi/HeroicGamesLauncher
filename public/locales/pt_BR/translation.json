@@ -1275,6 +1275,7 @@
         },
         "launching": "Lançamento",
         "card": {
+            "demo": "Demo",
             "needsUpdate": "Precisa atualizar"
         },
         "filter": {

@@ -34,11 +34,12 @@ type Props = {
   focused: boolean
   needsUpdate: boolean
   onClick: () => void
+  onActivate: () => void
   onFocus: () => void
 }
 
 const ConsoleCard = forwardRef<HTMLButtonElement, Props>(function ConsoleCard(
-  { game, focused, needsUpdate, onClick, onFocus },
+  { game, focused, needsUpdate, onClick, onActivate, onFocus },
   ref
 ) {
   const { t } = useTranslation()
@@ -59,7 +60,18 @@ const ConsoleCard = forwardRef<HTMLButtonElement, Props>(function ConsoleCard(
         progressing: isProgressing
       })}
       tabIndex={focused ? 0 : -1}
-      onClick={onClick}
+      onClick={(event) => {
+        onClick()
+        // Mouse clicks only select a game. Keyboard/gamepad activation uses a
+        // zero-detail click and should execute the selected game's action.
+        if (event.detail === 0) onActivate()
+      }}
+      onKeyDown={(event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return
+        event.preventDefault()
+        event.stopPropagation()
+        onActivate()
+      }}
       onFocus={onFocus}
     >
       <div className="consoleCardMedia">
@@ -71,6 +83,11 @@ const ConsoleCard = forwardRef<HTMLButtonElement, Props>(function ConsoleCard(
           className="consoleCardArt"
         />
         <StoreLogos runner={game.runner} className="consoleCardStoreIcon" />
+        {game.is_demo && (
+          <span className="consoleCardDemoBadge">
+            {t('console.card.demo', 'Demo')}
+          </span>
+        )}
         {needsUpdate && !showStatus && (
           <span className="consoleCardBadge">
             {t('console.card.needsUpdate', 'Needs update')}

@@ -29,6 +29,7 @@ import {
 import {
   runAurelia,
   runAureliaCommand,
+  fetchAureliaInfo,
   getSteamLibraryPath,
   getSteamInstallLibraries,
   AureliaError
@@ -45,6 +46,7 @@ import type {
 
 const library: Map<string, GameInfo> = new Map()
 const installedGames: Map<string, InstalledInfo> = new Map()
+const demoFlags = new Map<string, boolean>()
 
 const installPlatform = isWindows ? 'windows' : isMac ? 'osx' : 'linux'
 
@@ -56,7 +58,8 @@ function describeError(error: unknown): string {
   return error instanceof AureliaError ? error.message : String(error)
 }
 
-const STEAM_CDN = 'https://shared.akamai.steamstatic.com/store_item_assets/steam'
+const STEAM_CDN =
+  'https://shared.akamai.steamstatic.com/store_item_assets/steam'
 
 function getSteamAssetUrls(appId: string) {
   return {
@@ -113,6 +116,10 @@ export default class SteamLibraryManager implements LibraryManager {
     for (const game of games) {
       const appId = String(game.app_id)
       const info = this.steamToUnifiedInfo(game)
+      const knownDemoFlag = demoFlags.get(appId)
+      if (knownDemoFlag !== undefined) {
+        info.is_demo = knownDemoFlag
+      }
 
       // The game is only shown via Steam Family sharing when the user doesn't
       // own a license for it themselves.
@@ -133,6 +140,7 @@ export default class SteamLibraryManager implements LibraryManager {
 
     installedGamesStore.set('installed', Array.from(installedGames.values()))
     libraryStore.set('games', Array.from(library.values()))
+    void this.enrichDemoFlags(games.map((game) => String(game.app_id)))
 
     const logLines = Array.from(library.values()).map(
       (game) =>
@@ -151,6 +159,43 @@ export default class SteamLibraryManager implements LibraryManager {
     logInfo(`Found ${library.size} Steam games`, LogPrefix.Steam)
 
     return { stdout: 'Library refreshed', stderr: '' }
+  }
+
+  /**
+   * Steam's library list does not consistently expose the application type.
+   * Resolve it in the background so a demo can be marked without delaying the
+   * first library render.
+   */
+  private async enrichDemoFlags(appIds: string[]): Promise<void> {
+    const pending = appIds.filter((appId) => !demoFlags.has(appId))
+    const chunkSize = 50
+
+    for (let index = 0; index < pending.length; index += chunkSize) {
+      const chunk = pending.slice(index, index + chunkSize)
+      try {
+        const details = await fetchAureliaInfo(chunk)
+        for (const detail of details) {
+          const appId = String(detail.app_id)
+          if (!chunk.includes(appId)) continue
+
+          const isDemo = detail.type?.toLowerCase() === 'demo'
+          demoFlags.set(appId, isDemo)
+          const info = library.get(appId)
+          if (!info || info.is_demo === isDemo) continue
+
+          const enriched = { ...info, is_demo: isDemo }
+          library.set(appId, enriched)
+          sendFrontendMessage('pushGameToLibrary', enriched)
+        }
+      } catch (error) {
+        logWarning(
+          ['Unable to resolve Steam demo metadata', describeError(error)],
+          LogPrefix.Steam
+        )
+      }
+    }
+
+    libraryStore.set('games', Array.from(library.values()))
   }
 
   /**

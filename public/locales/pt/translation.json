@@ -1269,6 +1269,7 @@
         },
         "launching": "Iniciando",
         "card": {
+            "demo": "Demo",
             "needsUpdate": "Precisa atualizaçao"
         },
         "filter": {

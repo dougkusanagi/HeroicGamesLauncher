@@ -244,6 +244,7 @@
             "title": "Cancel update?"
         },
         "card": {
+            "demo": "Demo",
             "needsUpdate": "Needs update"
         },
         "empty": "No installed games to show. Install something first.",

@@ -216,6 +216,8 @@ export interface GameInfo {
   gog_save_location?: GOGCloudSavesLocation[]
   title: string
   canRunOffline: boolean
+  // Steam applications can be marked as demos by the store metadata.
+  is_demo?: boolean
   thirdPartyManagedApp?: string
   isEAManaged?: boolean
   isUbisoftManaged?: boolean

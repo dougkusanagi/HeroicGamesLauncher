@@ -568,10 +568,6 @@ export default function ConsoleMode() {
         'button:not(:disabled)'
       )
       first?.focus()
-    } else if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      const g = visibleGames[focusedIndex]
-      if (g) activateGame(g)
     }
   }
 
@@ -762,6 +758,7 @@ export default function ConsoleMode() {
                         focused={isFocused}
                         needsUpdate={gameUpdates.includes(game.app_name)}
                         onClick={() => setFocusedIndex(i)}
+                        onActivate={() => activateGame(game)}
                         onFocus={() => setFocusedIndex(i)}
                       />
                     )
