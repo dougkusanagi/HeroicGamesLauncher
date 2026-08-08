@@ -423,11 +423,11 @@
   position: relative;
   flex: 0 0 var(--console-card-width);
   aspect-ratio: 1;
-  overflow: hidden;
+  overflow: visible;
   border: 0;
   border-radius: 12px;
   outline: none;
-  background: rgba(15, 17, 20, 0.85);
+  background: transparent;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.44);
   cursor: pointer;
   filter: saturate(0.72) brightness(0.68);
@@ -452,6 +452,15 @@
       0 0 0 3px var(--console-accent),
       0 0 26px color-mix(in srgb, var(--console-accent) 48%, transparent);
   }
+}
+
+.consoleCardMedia {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  background: rgba(15, 17, 20, 0.85);
+  pointer-events: none;
 }
 
 .consoleCardArt {

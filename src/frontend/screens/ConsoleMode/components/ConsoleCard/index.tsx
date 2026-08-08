@@ -62,30 +62,34 @@ const ConsoleCard = forwardRef<HTMLButtonElement, Props>(function ConsoleCard(
       onClick={onClick}
       onFocus={onFocus}
     >
-      <CachedImage
-        src={getImageFormatting(game.art_square, game.runner) || fallBackImage}
-        alt={game.title}
-        className="consoleCardArt"
-      />
-      <StoreLogos runner={game.runner} className="consoleCardStoreIcon" />
-      {needsUpdate && !showStatus && (
-        <span className="consoleCardBadge">
-          {t('console.card.needsUpdate', 'Needs update')}
-        </span>
-      )}
-      {showStatus && (
-        <div className="consoleCardStatus">
-          <span className="consoleCardStatusText">{label}</span>
-          {isProgressing && (
-            <div className="consoleCardProgress" aria-hidden>
-              <div
-                className="consoleCardProgressFill"
-                style={{ width: `${percent}%` }}
-              />
-            </div>
-          )}
-        </div>
-      )}
+      <div className="consoleCardMedia">
+        <CachedImage
+          src={
+            getImageFormatting(game.art_square, game.runner) || fallBackImage
+          }
+          alt={game.title}
+          className="consoleCardArt"
+        />
+        <StoreLogos runner={game.runner} className="consoleCardStoreIcon" />
+        {needsUpdate && !showStatus && (
+          <span className="consoleCardBadge">
+            {t('console.card.needsUpdate', 'Needs update')}
+          </span>
+        )}
+        {showStatus && (
+          <div className="consoleCardStatus">
+            <span className="consoleCardStatusText">{label}</span>
+            {isProgressing && (
+              <div className="consoleCardProgress" aria-hidden>
+                <div
+                  className="consoleCardProgressFill"
+                  style={{ width: `${percent}%` }}
+                />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </button>
   )
 })
