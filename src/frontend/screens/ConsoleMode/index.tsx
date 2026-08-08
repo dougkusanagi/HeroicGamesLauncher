@@ -671,10 +671,7 @@ export default function ConsoleMode() {
                         game={game}
                         focused={isFocused}
                         needsUpdate={gameUpdates.includes(game.app_name)}
-                        onClick={() => {
-                          if (isFocused) activateGame(game)
-                          else setFocusedIndex(i)
-                        }}
+                        onClick={() => setFocusedIndex(i)}
                         onFocus={() => setFocusedIndex(i)}
                       />
                     )
