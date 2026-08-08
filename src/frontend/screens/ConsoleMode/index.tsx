@@ -653,7 +653,7 @@ export default function ConsoleMode() {
             onClick={() => setFilteringByInstalled(!filteringByInstalled)}
             disabled={!!launchingGame}
           >
-            {t('status.installed', 'Installed')}
+            {t('console.filter.installed', 'Installed')}
           </button>
           <button
             className="consoleChip"

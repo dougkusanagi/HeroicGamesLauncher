@@ -1273,7 +1273,8 @@
         },
         "filter": {
             "sideload": "Other",
-            "all": "Tudo"
+            "all": "Tudo",
+            "installed": "Instalado"
         },
         "empty": "Não há jogos para mostrar. Instale algum primeiro.",
         "games": "Jogos Instalados",

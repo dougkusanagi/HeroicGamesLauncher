@@ -249,6 +249,7 @@
         "empty": "No installed games to show. Install something first.",
         "filter": {
             "all": "All",
+            "installed": "Installed",
             "sideload": "Other"
         },
         "games": "Installed games",
