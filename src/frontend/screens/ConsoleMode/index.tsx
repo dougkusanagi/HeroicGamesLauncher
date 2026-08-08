@@ -20,6 +20,10 @@ import PlayArrow from '@mui/icons-material/PlayArrow'
 import InfoOutlined from '@mui/icons-material/InfoOutlined'
 import ChevronLeft from '@mui/icons-material/ChevronLeft'
 import ChevronRight from '@mui/icons-material/ChevronRight'
+import CalendarMonthOutlined from '@mui/icons-material/CalendarMonthOutlined'
+import DesktopWindowsOutlined from '@mui/icons-material/DesktopWindowsOutlined'
+import StorageOutlined from '@mui/icons-material/StorageOutlined'
+import SellOutlined from '@mui/icons-material/SellOutlined'
 import { CachedImage } from 'frontend/components/UI'
 import fallBackImage from 'frontend/assets/heroic_card.jpg'
 
@@ -279,6 +283,50 @@ export default function ConsoleMode() {
     : undefined
   const focusedGamePlaytime = focusedGame
     ? timestampStore.get_nodefault(focusedGame.app_name)?.totalPlayed
+    : undefined
+
+  const formatReleaseDate = (releaseDate?: string) => {
+    if (!releaseDate) return undefined
+    const date = new Date(releaseDate)
+    if (Number.isNaN(date.getTime())) return releaseDate
+    return new Intl.DateTimeFormat(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }).format(date)
+  }
+
+  const formatPlatform = (platform?: string) => {
+    if (!platform) return undefined
+    switch (platform.toLowerCase()) {
+      case 'windows':
+      case 'win32':
+        return t('platforms.win', 'Windows')
+      case 'linux':
+        return t('platforms.linux', 'Linux')
+      case 'mac':
+      case 'macos':
+      case 'osx':
+        return t('platforms.mac', 'Mac')
+      case 'browser':
+        return t('platforms.browser', 'Browser')
+      default:
+        return platform
+    }
+  }
+
+  const focusedGameReleaseDate = formatReleaseDate(
+    focusedGame?.extra?.releaseDate
+  )
+  const focusedGamePlatform = formatPlatform(focusedGame?.install.platform)
+  const focusedGameInstallSize =
+    focusedGame?.is_installed &&
+    focusedGame.install.install_size &&
+    focusedGame.install.install_size !== '0'
+      ? focusedGame.install.install_size
+      : undefined
+  const focusedGameVersion = focusedGame?.is_installed
+    ? focusedGame.install.version || focusedGame.version
     : undefined
 
   const focusedGameBackground =
@@ -716,6 +764,58 @@ export default function ConsoleMode() {
                     <p className="consoleHeroDescription">
                       {focusedGameDescription}
                     </p>
+                  )}
+
+                  {(focusedGameReleaseDate ||
+                    focusedGamePlatform ||
+                    focusedGameInstallSize ||
+                    focusedGameVersion) && (
+                    <div className="consoleHeroDetails">
+                      {focusedGameReleaseDate && (
+                        <div className="consoleHeroDetail">
+                          <CalendarMonthOutlined aria-hidden="true" />
+                          <span>
+                            <small>
+                              {t('console.meta.releaseDate', 'Released')}
+                            </small>
+                            <strong>{focusedGameReleaseDate}</strong>
+                          </span>
+                        </div>
+                      )}
+                      {focusedGamePlatform && (
+                        <div className="consoleHeroDetail">
+                          <DesktopWindowsOutlined aria-hidden="true" />
+                          <span>
+                            <small>
+                              {t('console.meta.platform', 'Platform')}
+                            </small>
+                            <strong>{focusedGamePlatform}</strong>
+                          </span>
+                        </div>
+                      )}
+                      {focusedGameInstallSize && (
+                        <div className="consoleHeroDetail">
+                          <StorageOutlined aria-hidden="true" />
+                          <span>
+                            <small>
+                              {t('console.meta.installSize', 'Installed size')}
+                            </small>
+                            <strong>{focusedGameInstallSize}</strong>
+                          </span>
+                        </div>
+                      )}
+                      {focusedGameVersion && (
+                        <div className="consoleHeroDetail">
+                          <SellOutlined aria-hidden="true" />
+                          <span>
+                            <small>
+                              {t('console.meta.version', 'Version')}
+                            </small>
+                            <strong>{focusedGameVersion}</strong>
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   )}
 
                   <div className="consoleHeroFacts">

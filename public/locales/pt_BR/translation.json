@@ -1288,8 +1288,12 @@
         "loading": "Carregando sua biblioteca…",
         "meta": {
             "cloudSaves": "Salvamentos na nuvem disponíveis",
+            "installSize": "Tamanho instalado",
+            "platform": "Plataforma",
             "playtimeHours": "{{hours}}h {{minutes}}min",
-            "playtimeMinutes": "{{minutes}}min"
+            "playtimeMinutes": "{{minutes}}min",
+            "releaseDate": "Lançamento",
+            "version": "Versão"
         },
         "cancelInstall": {
             "title": "Cancelar instalação?",

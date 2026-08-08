@@ -274,8 +274,12 @@
         "loading": "Loading your library…",
         "meta": {
             "cloudSaves": "Cloud saves supported",
+            "installSize": "Installed size",
+            "platform": "Platform",
             "playtimeHours": "{{hours}}h {{minutes}}m",
-            "playtimeMinutes": "{{minutes}}m"
+            "playtimeMinutes": "{{minutes}}m",
+            "releaseDate": "Released",
+            "version": "Version"
         },
         "nextGame": "Next game",
         "previousGame": "Previous game",
