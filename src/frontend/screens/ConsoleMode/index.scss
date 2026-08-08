@@ -438,6 +438,19 @@
     filter 190ms ease,
     opacity 190ms ease;
 
+  &::after {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    border: 3px solid transparent;
+    border-radius: inherit;
+    content: '';
+    pointer-events: none;
+    transition:
+      border-color 190ms ease,
+      box-shadow 190ms ease;
+  }
+
   &:hover,
   &:focus-visible {
     filter: saturate(0.95) brightness(0.86);
@@ -447,10 +460,16 @@
     z-index: 2;
     transform: scale(1.08);
     filter: saturate(1) brightness(1);
-    box-shadow:
-      0 14px 30px rgba(0, 0, 0, 0.58),
-      0 0 0 3px var(--console-accent),
-      0 0 26px color-mix(in srgb, var(--console-accent) 48%, transparent);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.58);
+
+    &::after {
+      border-color: var(--console-accent);
+      box-shadow:
+        inset 0 0 18px
+          color-mix(in srgb, var(--console-accent) 62%, transparent),
+        inset 0 0 42px
+          color-mix(in srgb, var(--console-accent) 24%, transparent);
+    }
   }
 }
 
