@@ -1,3 +1,5 @@
+import type { AppSettings } from 'common/types'
+
 type ConsoleSound = 'move' | 'confirm' | 'launch' | 'back' | 'filter' | 'sort'
 
 type Tone = {
@@ -15,7 +17,13 @@ type Tone = {
 }
 
 const MASTER_GAIN = 0.1
+const DEFAULT_SOUND_VOLUME = 70
 const MOVE_COOLDOWN_MS = 72
+
+type ConsoleSoundPreferences = Pick<
+  AppSettings,
+  'consoleSoundEnabled' | 'consoleSoundVolume'
+>
 
 const tones: Record<ConsoleSound, Tone[]> = {
   move: [
@@ -259,13 +267,66 @@ let audioContext: AudioContext | null = null
 let masterNode: GainNode | null = null
 let outputNode: DynamicsCompressorNode | null = null
 let lastMoveAt = 0
+let consoleSoundEnabled = true
+let consoleSoundVolume = DEFAULT_SOUND_VOLUME / 100
+let soundPreferencesLoaded = false
+let soundPreferencesRequest: Promise<void> | null = null
+
+function clampSoundVolume(volume: number) {
+  return Math.max(0, Math.min(100, volume)) / 100
+}
+
+export function setConsoleSoundPreferences(
+  preferences: Partial<ConsoleSoundPreferences>
+) {
+  if (preferences.consoleSoundEnabled !== undefined) {
+    consoleSoundEnabled = preferences.consoleSoundEnabled
+  }
+  if (preferences.consoleSoundVolume !== undefined) {
+    consoleSoundVolume = clampSoundVolume(preferences.consoleSoundVolume)
+  }
+
+  if (masterNode && audioContext) {
+    masterNode.gain.setTargetAtTime(
+      MASTER_GAIN * consoleSoundVolume,
+      audioContext.currentTime,
+      0.015
+    )
+  }
+}
+
+/** Load persisted preferences once without delaying the first UI cue. */
+export function loadConsoleSoundPreferences() {
+  if (
+    soundPreferencesLoaded ||
+    soundPreferencesRequest ||
+    typeof window === 'undefined' ||
+    !window.api
+  ) {
+    return
+  }
+
+  soundPreferencesRequest = window.api
+    .requestAppSettings()
+    .then((settings) => {
+      setConsoleSoundPreferences({
+        consoleSoundEnabled: settings.consoleSoundEnabled ?? true,
+        consoleSoundVolume: settings.consoleSoundVolume ?? DEFAULT_SOUND_VOLUME
+      })
+    })
+    .catch(() => undefined)
+    .finally(() => {
+      soundPreferencesLoaded = true
+      soundPreferencesRequest = null
+    })
+}
 
 function getAudioContext() {
   if (typeof window === 'undefined' || !window.AudioContext) return null
   if (!audioContext) {
     audioContext = new window.AudioContext()
     masterNode = audioContext.createGain()
-    masterNode.gain.value = MASTER_GAIN
+    masterNode.gain.value = MASTER_GAIN * consoleSoundVolume
     outputNode = audioContext.createDynamicsCompressor()
     outputNode.threshold.value = -25
     outputNode.knee.value = 18
@@ -335,6 +396,9 @@ function playTone(context: AudioContext, master: GainNode, tone: Tone) {
  * them rounded instead of dry.
  */
 export function playConsoleSound(sound: ConsoleSound) {
+  loadConsoleSoundPreferences()
+  if (!consoleSoundEnabled || consoleSoundVolume <= 0) return
+
   const now = performance.now()
   if (sound === 'move' && now - lastMoveAt < MOVE_COOLDOWN_MS) return
   if (sound === 'move') lastMoveAt = now

@@ -40,15 +40,18 @@ import {
   getActionButtonLabel,
   getBackButtonLabel
 } from './controller'
-import { playConsoleSound } from './audio'
+import { loadConsoleSoundPreferences, playConsoleSound } from './audio'
 import { useGamepadButtonPress, useGamepadInfo } from './hooks'
+import {
+  getConsoleLibraryGames,
+  getVisibleConsoleGames,
+  type ConsoleSortMode
+} from './logic'
 
 import type { TFunction } from 'i18next'
 import type { GameInfo, Runner } from 'common/types'
 
 type StoreKey = Runner | 'all'
-
-type ConsoleSortMode = 'last_played' | 'alpha_asc' | 'alpha_desc'
 
 const SORT_MODE_ORDER: ConsoleSortMode[] = [
   'last_played',
@@ -135,6 +138,7 @@ export default function ConsoleMode() {
   const previousFocusedGameKeyRef = useRef<string | null>(null)
 
   useEffect(() => {
+    loadConsoleSoundPreferences()
     window.api.setFullscreen(true)
     if (
       !refreshing &&
@@ -164,12 +168,7 @@ export default function ConsoleMode() {
       ...zoom.library,
       ...sideloadedLibrary
     ]
-    return all.filter(
-      (g) =>
-        !g.install?.is_dlc &&
-        !g.thirdPartyManagedApp &&
-        !hiddenAppNames.has(g.app_name)
-    )
+    return getConsoleLibraryGames(all, hiddenAppNames)
   }, [
     epic.library,
     gog.library,
@@ -184,29 +183,12 @@ export default function ConsoleMode() {
     // reset card refs to rebuild them
     cardRefs.current = []
 
-    let filteredGames = allGames
-
-    if (filteringByInstalled) {
-      filteredGames = filteredGames.filter((g) => g.is_installed)
-    }
-
-    if (activeStore !== 'all') {
-      filteredGames = filteredGames.filter((g) => g.runner === activeStore)
-    }
-
-    return filteredGames.sort((a, b) => {
-      if (sortMode === 'last_played') {
-        const ta = timestampStore.get_nodefault(a.app_name)?.lastPlayed ?? ''
-        const tb = timestampStore.get_nodefault(b.app_name)?.lastPlayed ?? ''
-        // Most recently played first; never-played games sink to the bottom,
-        // where ties are broken alphabetically.
-        if (!ta && !tb) return a.title.localeCompare(b.title)
-        if (!ta) return 1
-        if (!tb) return -1
-        return tb.localeCompare(ta)
-      }
-      const cmp = a.title.localeCompare(b.title)
-      return sortMode === 'alpha_asc' ? cmp : -cmp
+    return getVisibleConsoleGames(allGames, {
+      installedOnly: filteringByInstalled,
+      activeStore,
+      sortMode,
+      getLastPlayed: (appName) =>
+        timestampStore.get_nodefault(appName)?.lastPlayed
     })
   }, [allGames, filteringByInstalled, activeStore, sortMode])
 

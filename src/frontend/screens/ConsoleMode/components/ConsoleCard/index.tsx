@@ -9,6 +9,10 @@ import { hasProgress } from 'frontend/hooks/hasProgress'
 import { getProgress } from 'frontend/helpers'
 import { getImageFormatting } from 'frontend/screens/Library/components/GameCard/constants'
 import fallBackImage from 'frontend/assets/heroic_card.jpg'
+import {
+  isConsoleCardActivationKey,
+  shouldActivateConsoleCardClick
+} from '../../interaction'
 
 import type { GameInfo, Status } from 'common/types'
 
@@ -64,10 +68,10 @@ const ConsoleCard = forwardRef<HTMLButtonElement, Props>(function ConsoleCard(
         onClick()
         // Mouse clicks only select a game. Keyboard/gamepad activation uses a
         // zero-detail click and should execute the selected game's action.
-        if (event.detail === 0) onActivate()
+        if (shouldActivateConsoleCardClick(event.detail)) onActivate()
       }}
       onKeyDown={(event) => {
-        if (event.key !== 'Enter' && event.key !== ' ') return
+        if (!isConsoleCardActivationKey(event.key)) return
         event.preventDefault()
         event.stopPropagation()
         onActivate()

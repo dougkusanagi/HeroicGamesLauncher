@@ -364,6 +364,8 @@ class GlobalConfigV0 extends GlobalConfig {
       eacRuntime: isLinux,
       gamepadRepeatDelay: 50,
       gamepadInitialRepeatDelay: 300,
+      consoleSoundEnabled: true,
+      consoleSoundVolume: 70,
       battlEyeRuntime: isLinux,
       framelessWindow: false,
       hideWindowOnProtocolLaunch: false,

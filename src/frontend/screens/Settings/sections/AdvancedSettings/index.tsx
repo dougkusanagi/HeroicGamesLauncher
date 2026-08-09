@@ -29,6 +29,7 @@ import {
   HideWindowOnProtocolLaunch,
   ResetHeroic,
   GamePadDelayRepeat,
+  ConsoleSoundSettings,
   SteamGridDbApiKey
 } from '../../components'
 import DisableGOGPresence from '../../components/DisableGOGPresence'
@@ -196,6 +197,8 @@ export default function AdvancedSetting() {
       <AllowInstallationBrokenAnticheat />
 
       <GamePadDelayRepeat />
+
+      <ConsoleSoundSettings />
 
       <HideWindowOnProtocolLaunch />
 

@@ -131,6 +131,8 @@ export interface AppSettings extends GameSettings {
   exitToTray: boolean
   gamepadRepeatDelay: number
   gamepadInitialRepeatDelay: number
+  consoleSoundEnabled: boolean
+  consoleSoundVolume: number
   noTrayIcon: boolean
   experimentalFeatures?: ExperimentalFeatures
   framelessWindow: boolean

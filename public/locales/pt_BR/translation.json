@@ -649,6 +649,8 @@
         "FsrSharpnessStrenght": "FSR Força de nitidez",
         "fsync": "Habilitar Fsync",
         "gamemode": "Usar o GameMode (precisa estar instalado)",
+        "console-sound-enabled": "Habilitar sons do Modo Console",
+        "console-sound-volume": "Volume dos sons do Modo Console",
         "hideChangelogsOnStartup": "Não mostrar listas de mudanças ao inicializar",
         "language": "Selecione o idioma do app",
         "library_top_option": {
@@ -1281,12 +1283,15 @@
             "toggle_installed": "Alternar filtro Instalado"
         },
         "launching": "Lançamento",
+        "launchError": "Falha ao iniciar o jogo. Verifique os logs para mais detalhes.",
+        "launchErrorNotLoggedIn": "Falha ao iniciar o jogo. Você precisa entrar no Steam primeiro.",
+        "launchErrorPrefix": "Falha ao iniciar o jogo:",
         "card": {
             "demo": "Demo",
             "needsUpdate": "Precisa atualizar"
         },
         "filter": {
-            "sideload": "Other",
+            "sideload": "Outros",
             "all": "Todos",
             "installed": "Instalado"
         },
@@ -1310,7 +1315,7 @@
             "message": "Este jogo está sendo instalado no momento. Cancelar a instalação?"
         },
         "install": {
-            "platform": "Platform",
+            "platform": "Plataforma",
             "title": "Instalar jogo",
             "wineLoading": "Carregando…",
             "path": "Instalar em",
