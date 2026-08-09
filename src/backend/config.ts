@@ -366,6 +366,8 @@ class GlobalConfigV0 extends GlobalConfig {
       gamepadInitialRepeatDelay: 300,
       consoleSoundEnabled: true,
       consoleSoundVolume: 70,
+      consoleSoundPreset: 'steam',
+      consoleSoundCustomEvents: {},
       battlEyeRuntime: isLinux,
       framelessWindow: false,
       hideWindowOnProtocolLaunch: false,

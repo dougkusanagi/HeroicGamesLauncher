@@ -207,6 +207,7 @@
     "button": {
         "cancel": "Cancel",
         "continue": "Continue",
+        "done": "Concluído",
         "go_to_library": "Go to Library",
         "login": "Log in"
     },
@@ -260,6 +261,7 @@
             "navigate": "Navigate",
             "quit": "Quit",
             "sort": "Sort",
+            "sound_settings": "Configurações de som",
             "toggle_installed": "Toggle installed"
         },
         "install": {
@@ -292,9 +294,19 @@
             "message": "This game is queued for download. Remove it from the queue?"
         },
         "sort": "Sort",
-        "sortAlphaAsc": "A → Z",
-        "sortAlphaDesc": "Z → A",
-        "sortLastPlayed": "Last Played"
+        "soundModal": {
+            "enabled": "ATIVADO",
+            "hintAdjust": "Ajustar",
+            "hintBack": "Salvar & Voltar",
+            "hintNav": "Navegar",
+            "hintSelect": "Selecionar / Alterar",
+            "masterDesc": "Ativar ou mutar todos os sons do console",
+            "mutedAll": "MUTADO",
+            "shortTitle": "Sons",
+            "subtitle": "Ajuste usando o controle (D-Pad / A / B / Start) ou teclado",
+            "themeDesc": "Escolha o tema principal dos efeitos sonoros",
+            "title": "Configurações de Som"
+        }
     },
     "controller": {
         "hints": {
@@ -828,6 +840,22 @@
         "before-launch-script-path": "Select a script to run before the game is launched",
         "change-target-exe": "Select an alternative EXE to run",
         "checkForUpdatesOnStartup": "Check for Heroic Updates on Startup",
+        "console-sound": {
+            "hide-individual": "▼ Hide Individual Sound Customization",
+            "show-individual": "▶ Customize Individual Sounds"
+        },
+        "console-sound-enabled": "Enable Console Mode sounds",
+        "console-sound-option": {
+            "chiptune": "Retro Chiptune",
+            "inherit": "Theme Default",
+            "muted": "🔇 Muted",
+            "steam": "Steam Big Picture"
+        },
+        "console-sound-preset": {
+            "chiptune": "Retro Chiptune",
+            "steam": "Steam Big Picture (Ambient)"
+        },
+        "console-sound-volume": "Console Mode sound volume",
         "crossover-version": "Crossover/Wine Version",
         "custom_css": {
             "warning": "Warning: this applies to the whole frontend. That means the wrong style can render Heroic unusable. If needed, the setting can be changed manually in `~/.config/heroic/config.json`. Do NOT copy styles from sources you don't trust."
@@ -891,8 +919,6 @@
         "gamemode": "Use GameMode (Feral Game Mode needs to be installed)",
         "gamepad-initial-repeat-delay": "Gamepad input initial repeat delay",
         "gamepad-repeat-frequency": "Gamepad input repeat frequency",
-        "console-sound-enabled": "Enable Console Mode sounds",
-        "console-sound-volume": "Console Mode sound volume",
         "gamescope": {
             "enableForceGrabCursor": "Enable Force Grab Cursor",
             "enableLimiter": "Enable FPS Limiter",
@@ -1027,7 +1053,8 @@
                 "help6": "This will NOT delete:",
                 "help7": "Store login",
                 "help8": "Installed games",
-                "help9": "Games settings"
+                "help9": "Games settings",
+                "helpImages": "A separate button below clears only the downloaded game cover artwork cache, forcing pristine re-downloads with rate limiting."
             },
             "details": "Details",
             "resetHeroic": {
@@ -1043,6 +1070,7 @@
             "name": "BattlEye AntiCheat Runtime"
         },
         "clear-cache": "Clear Heroic Cache",
+        "clear-images-cache": "Clear Images Cache (Re-download covers)",
         "copiedToClipboard": "Copied to Clipboard!",
         "copyToClipboard": "Copy All Settings to Clipboard",
         "custom_css": {
@@ -1135,7 +1163,6 @@
         "console": "Console Mode"
     },
     "status": {
-        "installed": "Installed",
         "installing": "Installing",
         "logging": "Logging In...",
         "preparing_login": "Preparing Login... ",

@@ -32,6 +32,10 @@ export default function ControllerHints({
         {t('console.hints.toggle_installed', 'Toggle installed')}
       </div>
       <div className="hint">
+        <kbd className="buttonHintKey">Start</kbd>
+        {t('console.hints.sound_settings', 'Configurações de som')}
+      </div>
+      <div className="hint">
         <i className="buttonImage d-pad" />
         <i className="buttonImage left-stick" />
         {t('console.hints.navigate', 'Navigate')}

@@ -95,6 +95,24 @@ export type ExperimentalFeatures = {
   steamImport?: boolean
 }
 
+export type ConsoleSoundEvent =
+  | 'move'
+  | 'confirm'
+  | 'launch'
+  | 'back'
+  | 'filter'
+  | 'sort'
+
+export type ConsoleSoundEventSetting =
+  | 'inherit'
+  | 'steam'
+  | 'chiptune'
+  | 'muted'
+
+export type ConsoleSoundCustomEvents = Partial<
+  Record<ConsoleSoundEvent, ConsoleSoundEventSetting>
+>
+
 export interface AppSettings extends GameSettings {
   analyticsOptIn: boolean
   addDesktopShortcuts: boolean
@@ -133,6 +151,8 @@ export interface AppSettings extends GameSettings {
   gamepadInitialRepeatDelay: number
   consoleSoundEnabled: boolean
   consoleSoundVolume: number
+  consoleSoundPreset?: 'steam' | 'chiptune'
+  consoleSoundCustomEvents?: ConsoleSoundCustomEvents
   noTrayIcon: boolean
   experimentalFeatures?: ExperimentalFeatures
   framelessWindow: boolean

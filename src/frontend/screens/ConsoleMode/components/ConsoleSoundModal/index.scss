@@ -1,0 +1,284 @@
+.ps5SoundModalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(3, 4, 6, 0.82);
+  backdrop-filter: blur(18px);
+  animation: ps5ModalFade 200ms ease;
+}
+
+.ps5SoundModalCard {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 640px);
+  max-height: 88vh;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 18px;
+  background: rgba(12, 15, 19, 0.94);
+  box-shadow:
+    0 32px 64px rgba(0, 0, 0, 0.8),
+    0 0 32px rgba(255, 255, 255, 0.06);
+  color: var(--console-text, #f5f6f7);
+  overflow: hidden;
+  animation: ps5ModalZoom 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.ps5SoundModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 28px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.ps5SoundModalHeaderTitle {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  .ps5SoundModalHeaderIcon {
+    font-size: 1.8rem;
+    color: var(--console-accent, #ff8500);
+    filter: drop-shadow(0 0 10px var(--console-accent, #ff8500));
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 750;
+    letter-spacing: 0.08em;
+    color: #ffffff;
+  }
+
+  small {
+    color: var(--console-muted, rgba(235, 238, 242, 0.68));
+    font-size: 0.78rem;
+  }
+}
+
+.ps5SoundModalCloseBtn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all 150ms ease;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+  }
+}
+
+.ps5SoundModalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 24px;
+  overflow-y: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.ps5SoundRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 56px;
+  padding: 12px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(18, 22, 28, 0.6);
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+
+  &.disabled {
+    opacity: 0.4;
+  }
+
+  &.focused {
+    z-index: 2;
+    transform: scale(1.02);
+    border-color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow:
+      0 12px 28px rgba(0, 0, 0, 0.6),
+      0 0 16px rgba(255, 255, 255, 0.35),
+      inset 0 0 12px rgba(255, 255, 255, 0.2);
+    animation: ps5RowFocusPulse 2.8s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes ps5RowFocusPulse {
+  0% {
+    border-color: rgba(255, 255, 255, 0.88);
+    box-shadow:
+      0 12px 28px rgba(0, 0, 0, 0.6),
+      0 0 14px rgba(255, 255, 255, 0.3),
+      inset 0 0 10px rgba(255, 255, 255, 0.18);
+  }
+  100% {
+    border-color: rgba(255, 255, 255, 1);
+    box-shadow:
+      0 14px 32px rgba(0, 0, 0, 0.7),
+      0 0 22px rgba(255, 255, 255, 0.5),
+      inset 0 0 18px rgba(255, 255, 255, 0.32);
+  }
+}
+
+.ps5SoundRowLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  strong {
+    font-size: 0.94rem;
+    font-weight: 650;
+    color: #ffffff;
+  }
+
+  small {
+    color: var(--console-muted, rgba(235, 238, 242, 0.68));
+    font-size: 0.76rem;
+  }
+}
+
+.ps5SoundRowValue {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ps5PillBadge {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  padding: 5px 14px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--console-muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+
+  &.active {
+    border-color: var(--console-accent, #ff8500);
+    background: var(--console-accent, #ff8500);
+    color: #121212;
+  }
+}
+
+.ps5PillValue {
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ps5VolumeControl {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 170px;
+}
+
+.ps5VolumeText {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #ffffff;
+  min-width: 60px;
+}
+
+.ps5VolumeTrack {
+  position: relative;
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.ps5VolumeFill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--console-accent, #ff8500);
+  transition: width 150ms ease;
+}
+
+.ps5ActionBtnText {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--console-accent, #ff8500);
+}
+
+.ps5SoundModalFooter {
+  padding: 16px 28px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.ps5GamepadHints {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px 24px;
+}
+
+.ps5Hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--console-muted, rgba(235, 238, 242, 0.72));
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.ps5Glyph {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  padding: 2px 7px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+@keyframes ps5ModalFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ps5ModalZoom {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+  }
+}

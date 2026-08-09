@@ -14,6 +14,8 @@ export const BTN_FILTER = 2
 export const BTN_L1 = 4
 export const BTN_R1 = 5
 export const BTN_R2 = 7
+export const BTN_SELECT = 8
+export const BTN_START = 9
 
 export const getActionButtonLabel = (layout: ControllerLayout) =>
   layout.startsWith('ps') ? '✕' : 'A'

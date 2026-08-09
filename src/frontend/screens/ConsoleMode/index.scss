@@ -302,7 +302,7 @@
 .consoleStage {
   z-index: 1;
   display: grid;
-  grid-template-rows: minmax(148px, 26vh) minmax(0, 1fr);
+  grid-template-rows: minmax(175px, 29vh) minmax(0, 1fr);
   min-height: 0;
   overflow: hidden;
 }
@@ -389,23 +389,13 @@
   overflow-x: auto;
   overflow-y: hidden;
   outline: none;
-  padding: 12px var(--console-gutter) 18px;
+  padding: 20px var(--console-gutter) 24px;
   scroll-behavior: smooth;
   scroll-padding-inline: var(--console-gutter);
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+  scrollbar-width: none;
 
   &::-webkit-scrollbar {
-    height: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.22);
+    display: none;
   }
 }
 
@@ -416,7 +406,46 @@
   width: max-content;
   min-width: 100%;
   min-height: 100%;
-  padding: 4px max(8px, calc((100vw - var(--console-card-width)) / 2)) 8px;
+  padding: 12px max(8px, calc((100vw - var(--console-card-width)) / 2)) 16px;
+}
+
+@keyframes consoleCardPulse {
+  0% {
+    box-shadow:
+      0 14px 28px rgba(0, 0, 0, 0.58),
+      0 0 10px rgba(255, 255, 255, 0.22);
+  }
+  50% {
+    box-shadow:
+      0 16px 32px rgba(0, 0, 0, 0.65),
+      0 0 18px rgba(255, 255, 255, 0.42);
+  }
+  100% {
+    box-shadow:
+      0 14px 28px rgba(0, 0, 0, 0.58),
+      0 0 10px rgba(255, 255, 255, 0.22);
+  }
+}
+
+@keyframes consoleCardInnerPulse {
+  0% {
+    border-color: rgba(255, 255, 255, 0.88);
+    box-shadow:
+      0 0 8px rgba(255, 255, 255, 0.3),
+      inset 0 0 12px rgba(255, 255, 255, 0.25);
+  }
+  50% {
+    border-color: rgba(255, 255, 255, 1);
+    box-shadow:
+      0 0 14px rgba(255, 255, 255, 0.5),
+      inset 0 0 20px rgba(255, 255, 255, 0.42);
+  }
+  100% {
+    border-color: rgba(255, 255, 255, 0.88);
+    box-shadow:
+      0 0 8px rgba(255, 255, 255, 0.3),
+      inset 0 0 12px rgba(255, 255, 255, 0.25);
+  }
 }
 
 .consoleCard {
@@ -425,7 +454,7 @@
   aspect-ratio: 1;
   overflow: visible;
   border: 0;
-  border-radius: 12px;
+  border-radius: 14px;
   outline: none;
   background: transparent;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.44);
@@ -433,22 +462,22 @@
   filter: saturate(0.72) brightness(0.68);
   scroll-snap-align: center;
   transition:
-    transform 190ms cubic-bezier(0.2, 0.8, 0.2, 1),
-    box-shadow 190ms ease,
-    filter 190ms ease,
-    opacity 190ms ease;
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 220ms ease,
+    filter 220ms ease,
+    opacity 220ms ease;
 
   &::after {
     position: absolute;
     z-index: 2;
     inset: 0;
-    border: 3px solid transparent;
+    border: 2px solid transparent;
     border-radius: inherit;
     content: '';
     pointer-events: none;
     transition:
-      border-color 190ms ease,
-      box-shadow 190ms ease;
+      border-color 220ms ease,
+      box-shadow 220ms ease;
   }
 
   &:hover,
@@ -457,20 +486,14 @@
   }
 
   &.focused {
-    z-index: 2;
+    z-index: 5;
     transform: scale(1.08);
-    filter: saturate(1) brightness(1);
-    box-shadow:
-      0 16px 16px rgba(0, 0, 0, 0.58),
-      0 0 8px color-mix(in srgb, var(--console-accent) 30%, transparent);
+    filter: saturate(1) brightness(1.04);
+    animation: consoleCardPulse 2.8s ease-in-out infinite;
 
     &::after {
-      border-color: var(--console-accent);
-      box-shadow:
-        inset 0 0 22px
-          color-mix(in srgb, var(--console-accent) 76%, transparent),
-        inset 0 0 50px
-          color-mix(in srgb, var(--console-accent) 34%, transparent);
+      border-color: rgba(255, 255, 255, 0.95);
+      animation: consoleCardInnerPulse 2.8s ease-in-out infinite;
     }
   }
 }
@@ -741,11 +764,12 @@
   height: 44px;
   min-height: 44px;
   white-space: nowrap;
-  border-radius: 8px;
+  border-radius: 999px;
   cursor: pointer;
   font-family: inherit;
   font-size: 0.95rem;
   font-weight: 700;
+  padding: 0 22px;
   transition:
     transform 150ms ease,
     background 150ms ease,

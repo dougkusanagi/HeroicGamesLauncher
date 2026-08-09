@@ -80,7 +80,10 @@ function markFailed(digest: string): void {
  * Concurrency is capped and failures are negatively cached via a `.err`
  * marker file so we don't hammer the CDN on every render.
  */
-async function downloadImage(realUrl: string, digest: string): Promise<boolean> {
+async function downloadImage(
+  realUrl: string,
+  digest: string
+): Promise<boolean> {
   const marker = failedMarkerPath(digest)
   // Clean up a stale marker before a fresh attempt.
   if (existsSync(marker)) {

@@ -1,6 +1,12 @@
-import type { AppSettings } from 'common/types'
+import type {
+  AppSettings,
+  ConsoleSoundCustomEvents,
+  ConsoleSoundEvent,
+  ConsoleSoundEventSetting
+} from 'common/types'
 
-type ConsoleSound = 'move' | 'confirm' | 'launch' | 'back' | 'filter' | 'sort'
+type ConsoleSound = ConsoleSoundEvent
+export type SoundPreset = 'steam' | 'chiptune'
 
 type Tone = {
   at: number
@@ -22,10 +28,13 @@ const MOVE_COOLDOWN_MS = 72
 
 type ConsoleSoundPreferences = Pick<
   AppSettings,
-  'consoleSoundEnabled' | 'consoleSoundVolume'
+  | 'consoleSoundEnabled'
+  | 'consoleSoundVolume'
+  | 'consoleSoundPreset'
+  | 'consoleSoundCustomEvents'
 >
 
-const tones: Record<ConsoleSound, Tone[]> = {
+const chiptuneTones: Record<ConsoleSound, Tone[]> = {
   move: [
     {
       at: 0,
@@ -263,12 +272,225 @@ const tones: Record<ConsoleSound, Tone[]> = {
   ]
 }
 
+/** Steam Big Picture inspired warm, acoustic/ambient synthesized sound profile */
+const steamTones: Record<ConsoleSound, Tone[]> = {
+  move: [
+    {
+      at: 0,
+      duration: 0.055,
+      from: 260,
+      to: 340,
+      gain: 0.18,
+      filterFrom: 800,
+      filterTo: 1400,
+      attack: 0.003,
+      release: 0.04,
+      type: 'sine'
+    },
+    {
+      at: 0,
+      duration: 0.045,
+      from: 140,
+      to: 170,
+      gain: 0.1,
+      filterFrom: 400,
+      filterTo: 800,
+      attack: 0.003,
+      release: 0.035,
+      type: 'sine'
+    }
+  ],
+  confirm: [
+    {
+      at: 0,
+      duration: 0.14,
+      from: 392,
+      to: 523.25,
+      gain: 0.16,
+      filterFrom: 1800,
+      filterTo: 2800,
+      attack: 0.005,
+      release: 0.1,
+      type: 'sine'
+    },
+    {
+      at: 0.04,
+      duration: 0.2,
+      from: 523.25,
+      to: 659.25,
+      gain: 0.13,
+      filterFrom: 2200,
+      filterTo: 3200,
+      attack: 0.005,
+      release: 0.14,
+      pan: 0.06,
+      type: 'sine'
+    },
+    {
+      at: 0.08,
+      duration: 0.28,
+      from: 783.99,
+      to: 1046.5,
+      gain: 0.07,
+      filterFrom: 2600,
+      filterTo: 3800,
+      attack: 0.005,
+      release: 0.2,
+      pan: -0.06,
+      type: 'sine'
+    }
+  ],
+  launch: [
+    {
+      at: 0,
+      duration: 0.6,
+      from: 65.41,
+      to: 130.81,
+      gain: 0.22,
+      filterFrom: 250,
+      filterTo: 700,
+      attack: 0.02,
+      release: 0.35,
+      type: 'sine'
+    },
+    {
+      at: 0.05,
+      duration: 0.5,
+      from: 261.63,
+      to: 392.0,
+      gain: 0.14,
+      filterFrom: 1200,
+      filterTo: 2200,
+      attack: 0.015,
+      release: 0.3,
+      pan: -0.08,
+      type: 'sine'
+    },
+    {
+      at: 0.12,
+      duration: 0.55,
+      from: 392.0,
+      to: 523.25,
+      gain: 0.12,
+      filterFrom: 1600,
+      filterTo: 2800,
+      attack: 0.015,
+      release: 0.35,
+      pan: 0.08,
+      type: 'sine'
+    },
+    {
+      at: 0.22,
+      duration: 0.65,
+      from: 523.25,
+      to: 783.99,
+      gain: 0.1,
+      filterFrom: 2000,
+      filterTo: 3400,
+      attack: 0.015,
+      release: 0.4,
+      pan: -0.05,
+      type: 'sine'
+    },
+    {
+      at: 0.35,
+      duration: 0.75,
+      from: 1046.5,
+      to: 1046.5,
+      gain: 0.08,
+      filterFrom: 2400,
+      filterTo: 4000,
+      attack: 0.01,
+      release: 0.5,
+      pan: 0.05,
+      type: 'sine'
+    }
+  ],
+  back: [
+    {
+      at: 0,
+      duration: 0.1,
+      from: 523.25,
+      to: 392.0,
+      gain: 0.16,
+      filterFrom: 1600,
+      filterTo: 1000,
+      attack: 0.004,
+      release: 0.07,
+      type: 'sine'
+    },
+    {
+      at: 0.035,
+      duration: 0.13,
+      from: 392.0,
+      to: 261.63,
+      gain: 0.12,
+      filterFrom: 1200,
+      filterTo: 700,
+      attack: 0.004,
+      release: 0.09,
+      type: 'sine'
+    }
+  ],
+  filter: [
+    {
+      at: 0,
+      duration: 0.07,
+      from: 349.23,
+      to: 440.0,
+      gain: 0.15,
+      filterFrom: 1400,
+      filterTo: 2200,
+      type: 'sine'
+    },
+    {
+      at: 0.03,
+      duration: 0.09,
+      from: 440.0,
+      to: 554.37,
+      gain: 0.12,
+      filterFrom: 1800,
+      filterTo: 2600,
+      type: 'sine'
+    }
+  ],
+  sort: [
+    {
+      at: 0,
+      duration: 0.06,
+      from: 440.0,
+      to: 554.37,
+      gain: 0.14,
+      filterFrom: 1600,
+      filterTo: 2400,
+      type: 'sine'
+    },
+    {
+      at: 0.03,
+      duration: 0.08,
+      from: 554.37,
+      to: 659.25,
+      gain: 0.11,
+      filterFrom: 2000,
+      filterTo: 2800,
+      type: 'sine'
+    }
+  ]
+}
+
+const soundProfiles: Record<SoundPreset, Record<ConsoleSound, Tone[]>> = {
+  steam: steamTones,
+  chiptune: chiptuneTones
+}
+
 let audioContext: AudioContext | null = null
 let masterNode: GainNode | null = null
 let outputNode: DynamicsCompressorNode | null = null
 let lastMoveAt = 0
 let consoleSoundEnabled = true
 let consoleSoundVolume = DEFAULT_SOUND_VOLUME / 100
+let consoleSoundPreset: SoundPreset = 'steam'
+let consoleSoundCustomEvents: ConsoleSoundCustomEvents = {}
 let soundPreferencesLoaded = false
 let soundPreferencesRequest: Promise<void> | null = null
 
@@ -284,6 +506,12 @@ export function setConsoleSoundPreferences(
   }
   if (preferences.consoleSoundVolume !== undefined) {
     consoleSoundVolume = clampSoundVolume(preferences.consoleSoundVolume)
+  }
+  if (preferences.consoleSoundPreset !== undefined) {
+    consoleSoundPreset = preferences.consoleSoundPreset
+  }
+  if (preferences.consoleSoundCustomEvents !== undefined) {
+    consoleSoundCustomEvents = preferences.consoleSoundCustomEvents
   }
 
   if (masterNode && audioContext) {
@@ -311,7 +539,9 @@ export function loadConsoleSoundPreferences() {
     .then((settings) => {
       setConsoleSoundPreferences({
         consoleSoundEnabled: settings.consoleSoundEnabled ?? true,
-        consoleSoundVolume: settings.consoleSoundVolume ?? DEFAULT_SOUND_VOLUME
+        consoleSoundVolume: settings.consoleSoundVolume ?? DEFAULT_SOUND_VOLUME,
+        consoleSoundPreset: settings.consoleSoundPreset ?? 'steam',
+        consoleSoundCustomEvents: settings.consoleSoundCustomEvents ?? {}
       })
     })
     .catch(() => undefined)
@@ -389,15 +619,22 @@ function playTone(context: AudioContext, master: GainNode, tone: Tone) {
   oscillator.stop(end + 0.02)
 }
 
-/**
- * Chiptune-inspired, synthesized UI cues keep console mode responsive without
- * adding copyrighted or platform-specific sound assets. Pulse and triangle
- * voices give the cues a classic-game character, while the filtered echo keeps
- * them rounded instead of dry.
- */
 export function playConsoleSound(sound: ConsoleSound) {
   loadConsoleSoundPreferences()
   if (!consoleSoundEnabled || consoleSoundVolume <= 0) return
+
+  const customEventSetting: ConsoleSoundEventSetting =
+    consoleSoundCustomEvents[sound] || 'inherit'
+  if (customEventSetting === 'muted') return
+
+  const activePreset: SoundPreset =
+    customEventSetting === 'steam' || customEventSetting === 'chiptune'
+      ? customEventSetting
+      : consoleSoundPreset
+
+  const profileTones = soundProfiles[activePreset] || soundProfiles.steam
+  const activeTones = profileTones[sound]
+  if (!activeTones || activeTones.length === 0) return
 
   const now = performance.now()
   if (sound === 'move' && now - lastMoveAt < MOVE_COOLDOWN_MS) return
@@ -407,5 +644,5 @@ export function playConsoleSound(sound: ConsoleSound) {
   if (!context || !masterNode) return
 
   void context.resume().catch(() => {})
-  for (const tone of tones[sound]) playTone(context, masterNode, tone)
+  for (const tone of activeTones) playTone(context, masterNode, tone)
 }

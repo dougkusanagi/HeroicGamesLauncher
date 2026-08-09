@@ -24,6 +24,7 @@ import CalendarMonthOutlined from '@mui/icons-material/CalendarMonthOutlined'
 import DesktopWindowsOutlined from '@mui/icons-material/DesktopWindowsOutlined'
 import StorageOutlined from '@mui/icons-material/StorageOutlined'
 import SellOutlined from '@mui/icons-material/SellOutlined'
+import VolumeUpOutlined from '@mui/icons-material/VolumeUpOutlined'
 import { CachedImage } from 'frontend/components/UI'
 import fallBackImage from 'frontend/assets/heroic_card.jpg'
 
@@ -32,11 +33,13 @@ import ConsoleCard from './components/ConsoleCard'
 import ControllerHints from './components/ControllerHints'
 import LaunchOverlay from './components/LaunchOverlay'
 import InstallOverlay from './InstallOverlay'
+import ConsoleSoundModal from './components/ConsoleSoundModal'
 import {
   BTN_FILTER,
   BTN_L1,
   BTN_R1,
   BTN_R2,
+  BTN_START,
   getActionButtonLabel,
   getBackButtonLabel
 } from './controller'
@@ -124,11 +127,22 @@ export default function ConsoleMode() {
   const [queuedNoticeGame, setQueuedNoticeGame] = useState<GameInfo | null>(
     null
   )
+  const [showSoundModal, setShowSoundModal] = useState(false)
 
   const { connected: gamepadConnected, layout: controllerLayout } =
     useGamepadInfo()
   const backButtonLabel = getBackButtonLabel(controllerLayout)
   const actionButtonLabel = getActionButtonLabel(controllerLayout)
+
+  // Start button toggles Sound Settings modal overlay
+  useGamepadButtonPress(
+    BTN_START,
+    () => {
+      playConsoleSound(showSoundModal ? 'back' : 'confirm')
+      setShowSoundModal((prev) => !prev)
+    },
+    !launchingGame
+  )
 
   const cardRefs = useRef<Array<HTMLButtonElement | null>>([])
   const gridRef = useRef<HTMLDivElement | null>(null)
@@ -276,7 +290,13 @@ export default function ConsoleMode() {
     focusedGame?.extra?.about?.shortDescription ||
     focusedGame?.extra?.about?.description ||
     focusedGame?.description
-  const focusedGameGenres = focusedGame?.extra?.genres?.filter(Boolean) ?? []
+  const focusedGameGenres = useMemo(() => {
+    const rawGenres = focusedGame?.extra?.genres?.filter(Boolean) ?? []
+    const titleLower = (focusedGameTitle || '').toLowerCase().trim()
+    return rawGenres.filter(
+      (genre) => genre.toLowerCase().trim() !== titleLower
+    )
+  }, [focusedGame, focusedGameTitle])
   const focusedGameStatus = focusedGame
     ? libraryStatus.find((g) => g.appName === focusedGame.app_name)?.status
     : undefined
@@ -411,7 +431,8 @@ export default function ConsoleMode() {
     !installingGame &&
     !updateNoticeGame &&
     !cancelDownloadGame &&
-    !queuedNoticeGame
+    !queuedNoticeGame &&
+    !showSoundModal
 
   const activateGame = useCallback(
     (game: GameInfo) => {
@@ -675,21 +696,35 @@ export default function ConsoleMode() {
             className="consoleChip"
             onClick={cycleSort}
             aria-label={t('console.sort', 'Sort')}
-            disabled={!!launchingGame}
+            disabled={!idle}
           >
             {t(SORT_MODE_LABEL[sortMode], SORT_MODE_DEFAULT[sortMode])}
           </button>
           <button
             className="consoleQuitButton"
-            onClick={quit}
-            disabled={!!launchingGame}
+            onClick={() => {
+              playConsoleSound('confirm')
+              setShowSoundModal(true)
+            }}
+            aria-label={t('console.soundModal.title', 'Configurações de Som')}
+            disabled={!idle}
           >
+            <VolumeUpOutlined
+              style={{
+                fontSize: '1rem',
+                verticalAlign: 'middle',
+                marginRight: 4
+              }}
+            />
+            {t('console.soundModal.shortTitle', 'Sons')}
+          </button>
+          <button className="consoleQuitButton" onClick={quit} disabled={!idle}>
             {t('console.quit', 'Quit Console')}
           </button>
           <button
             className="consoleQuitButton danger"
             onClick={() => window.api.quit()}
-            disabled={!!launchingGame}
+            disabled={!idle}
           >
             {t('console.quitApp', 'Quit App')}
           </button>
@@ -966,6 +1001,10 @@ export default function ConsoleMode() {
           backButtonLabel={backButtonLabel}
           actionButtonLabel={actionButtonLabel}
         />
+      )}
+
+      {showSoundModal && (
+        <ConsoleSoundModal onDismiss={() => setShowSoundModal(false)} />
       )}
     </div>
   )
