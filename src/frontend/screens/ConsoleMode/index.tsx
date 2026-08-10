@@ -355,16 +355,28 @@ export default function ConsoleMode() {
     focusedGame?.art_square ||
     fallBackImage
 
+  const focusedGameIsRunning =
+    focusedGameStatus === 'launching' ||
+    focusedGameStatus === 'playing' ||
+    focusedGameStatus === 'syncing-saves'
+
   const focusedGameActionLabel = focusedGame
-    ? focusedGameStatus === 'queued'
-      ? t('gamepage:button.queue.remove', 'Remove from Queue')
-      : focusedGameStatus === 'installing' || focusedGameStatus === 'updating'
-        ? t('button.cancel', 'Cancel')
-        : !focusedGame.is_installed
-          ? t('gamepage:button.install', 'Install')
-          : gameUpdates.includes(focusedGame.app_name)
-            ? t('gamepage:button.update', 'Update')
-            : t('gamepage:button.play', 'Play')
+    ? focusedGameStatus === 'launching'
+      ? t('gamepage:status.launching', 'Launching')
+      : focusedGameStatus === 'playing'
+        ? t('gamepage:status.playing', 'Playing')
+        : focusedGameStatus === 'syncing-saves'
+          ? t('gamepage:status.syncingSaves', 'Syncing Saves')
+          : focusedGameStatus === 'queued'
+            ? t('gamepage:button.queue.remove', 'Remove from Queue')
+            : focusedGameStatus === 'installing' ||
+                focusedGameStatus === 'updating'
+              ? t('button.cancel', 'Cancel')
+              : !focusedGame.is_installed
+                ? t('gamepage:button.install', 'Install')
+                : gameUpdates.includes(focusedGame.app_name)
+                  ? t('gamepage:button.update', 'Update')
+                  : t('gamepage:button.play', 'Play')
     : ''
 
   const focusedGameStatusLabel = (() => {
@@ -440,6 +452,14 @@ export default function ConsoleMode() {
       const status = libraryStatus.find(
         (g) => g.appName === game.app_name
       )?.status
+      // Block activation when the game is already running
+      if (
+        status === 'launching' ||
+        status === 'playing' ||
+        status === 'syncing-saves'
+      ) {
+        return
+      }
       if (status === 'queued') {
         playConsoleSound('confirm')
         setQueuedNoticeGame(game)
@@ -909,7 +929,7 @@ export default function ConsoleMode() {
                       ref={primaryActionRef}
                       className="consolePrimaryAction"
                       onClick={() => activateGame(focusedGame)}
-                      disabled={!idle}
+                      disabled={!idle || focusedGameIsRunning}
                     >
                       <PlayArrow aria-hidden="true" />
                       <span>{focusedGameActionLabel}</span>

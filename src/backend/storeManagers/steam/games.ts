@@ -56,6 +56,36 @@ function describeError(error: unknown): string {
   return error instanceof AureliaError ? error.message : String(error)
 }
 
+/**
+ * Aurelia reports command failures in a JSON response on stdout. `callRunner`
+ * only reports failures starting the process itself, so inspect the response
+ * before treating a command as successful.
+ */
+function getAureliaCommandError(result: ExecResult): string | undefined {
+  if (result.error) {
+    // Preserve the existing handling for commands terminated by a signal.
+    return result.error.includes('signal') ? undefined : result.error
+  }
+
+  // An aborted command is expected when the user cancels a launch.
+  if (result.abort) return undefined
+
+  try {
+    parseAureliaJson(result)
+  } catch (error) {
+    // Some successful commands do not emit a JSON payload. Only turn parser
+    // errors into launch failures when Aurelia actually returned an error.
+    if (
+      error instanceof AureliaError &&
+      error.message !== 'aurelia produced no JSON output'
+    ) {
+      return describeError(error)
+    }
+  }
+
+  return undefined
+}
+
 function aureliaPlatform(platform: InstallPlatform): string | undefined {
   const lc = String(platform).toLowerCase()
   if (lc.startsWith('win')) return 'windows'
@@ -722,12 +752,15 @@ export default class SteamGame implements Game {
       logWriters: [logWriter]
     })
 
-    if (res.error && !res.error.includes('signal')) {
+    const launchError = getAureliaCommandError(res)
+    if (launchError) {
       logError(
-        [`Failed to launch ${this.id} through Aurelia`, res.error],
+        [`Failed to launch ${this.id} through Aurelia`, launchError],
         LogPrefix.Steam
       )
-      return false
+      // Preserve the Aurelia message so the frontend can explain why the
+      // launch failed instead of treating the command as a successful exit.
+      throw new Error(launchError)
     }
 
     // Sync after game stopped

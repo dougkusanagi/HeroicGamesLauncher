@@ -100,6 +100,9 @@ export default function LaunchOverlay({
   useEffect(() => {
     const showError = (errMsg?: string) => {
       setLaunchError(buildLaunchErrorMessage(errMsg))
+      // Launching can hide the main window. Restore it so a failed launch is
+      // visible instead of leaving the user with a hidden error overlay.
+      window.api.showWindow()
       setTimeout(() => handleDismiss(), errMsg ? 5000 : 3000)
     }
     void launch({
