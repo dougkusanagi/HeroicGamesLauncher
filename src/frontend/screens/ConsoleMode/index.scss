@@ -216,6 +216,21 @@
   white-space: nowrap;
 }
 
+.consoleClock {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(8px);
+  color: var(--console-text);
+  font-size: clamp(0.85rem, 1vw, 1.05rem);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
 %consoleButtonDisabled {
   &:disabled {
     cursor: default;
@@ -327,58 +342,67 @@
 
 .consoleCarouselArrow {
   position: absolute;
-  top: 50%;
-  z-index: 3;
-  display: grid;
-  width: clamp(38px, 3.2vw, 54px);
-  height: clamp(54px, 8vh, 78px);
+  top: calc(20px + 12px);
+  height: var(--console-card-width);
+  z-index: 10;
+  display: flex;
   align-items: center;
-  justify-items: center;
-  border: 1px solid rgba(245, 246, 247, 0.24);
-  border-radius: 999px;
-  background: rgba(8, 10, 12, 0.78);
-  color: var(--console-text);
+  width: clamp(70px, 9vw, 120px);
+  border: none;
+  background: transparent;
+  color: rgba(245, 246, 247, 0.65);
   cursor: pointer;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.36);
-  transform: translateY(-50%);
+  outline: none;
   transition:
-    background 150ms ease,
-    border-color 150ms ease,
-    opacity 150ms ease,
-    transform 150ms ease;
+    opacity 220ms ease,
+    color 180ms ease;
+  pointer-events: auto;
 
   svg {
-    font-size: clamp(1.6rem, 2.2vw, 2.25rem);
+    font-size: clamp(2.2rem, 3vw, 3.2rem);
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.8));
+    transition:
+      transform 180ms ease,
+      color 180ms ease;
   }
 
   &.previous {
-    left: clamp(10px, 1.4vw, 26px);
+    left: 0;
+    justify-content: flex-start;
+    padding-left: clamp(12px, 1.8vw, 28px);
+    background: linear-gradient(
+      90deg,
+      #050607 0%,
+      rgba(5, 6, 7, 0.92) 55%,
+      rgba(5, 6, 7, 0) 100%
+    );
   }
 
   &.next {
-    right: clamp(10px, 1.4vw, 26px);
+    right: 0;
+    justify-content: flex-end;
+    padding-right: clamp(12px, 1.8vw, 28px);
+    background: linear-gradient(
+      270deg,
+      #050607 0%,
+      rgba(5, 6, 7, 0.92) 55%,
+      rgba(5, 6, 7, 0) 100%
+    );
   }
 
   &:hover,
   &:focus-visible {
-    border-color: color-mix(in srgb, var(--console-accent) 72%, transparent);
-    outline: none;
-    background: color-mix(
-      in srgb,
-      var(--console-accent) 28%,
-      rgba(8, 10, 12, 0.9)
-    );
-    transform: translateY(-50%) scale(1.04);
-  }
+    color: var(--console-text);
 
-  &:focus-visible {
-    outline: 3px solid rgba(255, 255, 255, 0.92);
-    outline-offset: 3px;
+    svg {
+      transform: scale(1.2);
+      color: var(--console-accent, #ff8500);
+    }
   }
 
   &:disabled {
     cursor: default;
-    opacity: 0.24;
+    opacity: 0;
     pointer-events: none;
   }
 }
@@ -406,7 +430,7 @@
   width: max-content;
   min-width: 100%;
   min-height: 100%;
-  padding: 12px max(8px, calc((100vw - var(--console-card-width)) / 2)) 16px;
+  padding: 12px 0 16px;
 }
 
 @keyframes consoleCardPulse {

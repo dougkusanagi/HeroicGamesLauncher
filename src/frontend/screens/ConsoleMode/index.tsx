@@ -30,6 +30,7 @@ import fallBackImage from 'frontend/assets/heroic_card.jpg'
 
 import ConfirmDialog from './components/ConfirmDialog'
 import ConsoleCard from './components/ConsoleCard'
+import ConsoleClock from './components/ConsoleClock'
 import ControllerHints from './components/ControllerHints'
 import LaunchOverlay from './components/LaunchOverlay'
 import InstallOverlay from './InstallOverlay'
@@ -267,7 +268,7 @@ export default function ConsoleMode() {
     }
     btn.scrollIntoView({
       block: 'nearest',
-      inline: 'center',
+      inline: focusedIndex === 0 ? 'start' : 'center',
       behavior: 'smooth'
     })
   }, [focusedIndex, visibleGames.length])
@@ -752,6 +753,7 @@ export default function ConsoleMode() {
         <div className="consoleBrand" aria-label="Heroic Games Launcher">
           <HeroicIcon className="consoleLogo" />
           <span className="consoleWordmark">HEROIC</span>
+          <ConsoleClock />
         </div>
       </div>
 
