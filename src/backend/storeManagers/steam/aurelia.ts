@@ -1,6 +1,7 @@
 import { join } from 'path'
 import { userInfo } from 'os'
 import { spawn } from 'child_process'
+import { existsSync, readFileSync } from 'graceful-fs'
 import { callRunner } from 'backend/launcher'
 import {
   getAureliaBin,
@@ -9,9 +10,10 @@ import {
   sendProgressUpdate
 } from 'backend/utils'
 import { appFolder } from 'backend/constants/paths'
-import { logError, LogPrefix } from 'backend/logger'
+import { logError, logInfo, logWarning, LogPrefix } from 'backend/logger'
 import type { CallRunnerOptions, ExecResult, Status } from 'common/types'
 import type {
+  AureliaAccount,
   AureliaConfigShowResponse,
   AureliaInfoResponse,
   AureliaLibrariesResponse,
@@ -331,6 +333,141 @@ export async function getSteamLibraryPath(): Promise<string | undefined> {
   } catch (error) {
     logError(
       ['Unable to read Aurelia config for Steam library path', error],
+      LogPrefix.Steam
+    )
+    return undefined
+  }
+}
+
+const STEAM_ID64_BASE = BigInt('76561197960265728')
+let steamClientStartup: Promise<void> | undefined
+
+function steamAccountId(steamId: string | number): string | undefined {
+  try {
+    const id = BigInt(String(steamId))
+    return (id >= STEAM_ID64_BASE ? id - STEAM_ID64_BASE : id).toString()
+  } catch {
+    return undefined
+  }
+}
+
+function steamAccountIdFromSession(): string | undefined {
+  try {
+    // SteamID64 is larger than JavaScript's safe integer range. Read the raw
+    // JSON token instead of going through JSON.parse, which would round it.
+    const session = readFileSync(join(aureliaConfigDir, 'session.json'), 'utf8')
+    const match = session.match(/"steam_id"\s*:\s*"?(\d+)"?/)
+    return match?.[1] ? steamAccountId(match[1]) : undefined
+  } catch {
+    return undefined
+  }
+}
+
+function delay(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds))
+}
+
+function isSteamClientRunning(): Promise<boolean> {
+  return new Promise((resolve) => {
+    const tasklist = spawn(
+      'tasklist',
+      ['/FI', 'IMAGENAME eq steam.exe', '/NH'],
+      { windowsHide: true }
+    )
+    let output = ''
+    tasklist.stdout?.on('data', (data: Buffer | string) => {
+      output += data.toString()
+    })
+    tasklist.once('error', () => resolve(false))
+    tasklist.once('close', (code) => {
+      resolve(code === 0 && /\bsteam\.exe\b/i.test(output))
+    })
+  })
+}
+
+async function startSteamClient(): Promise<void> {
+  if (await isSteamClientRunning()) return
+
+  const steamLibraryPath = await getSteamLibraryPath()
+  const steamExecutable = steamLibraryPath
+    ? join(steamLibraryPath, 'steam.exe')
+    : undefined
+
+  if (!steamExecutable || !existsSync(steamExecutable)) {
+    logWarning(
+      'Steam client is not running and steam.exe could not be located',
+      LogPrefix.Steam
+    )
+    return
+  }
+
+  logInfo('Starting the Steam client silently for this game', LogPrefix.Steam)
+  const steam = spawn(steamExecutable, ['-silent'], {
+    detached: true,
+    stdio: 'ignore',
+    windowsHide: true
+  })
+  steam.once('error', (error) =>
+    logWarning(
+      ['Unable to start the Steam client', String(error)],
+      LogPrefix.Steam
+    )
+  )
+  steam.unref()
+
+  const deadline = Date.now() + 20_000
+  while (Date.now() < deadline) {
+    if (await isSteamClientRunning()) {
+      // Steam's process appears before Steamworks is ready to answer requests.
+      await delay(1500)
+      return
+    }
+    await delay(500)
+  }
+
+  logWarning(
+    'Steam client did not become ready before the game launch',
+    LogPrefix.Steam
+  )
+}
+
+/** Starts the Windows Steam client when a native Steam game needs Steamworks. */
+export async function ensureSteamClientRunning(): Promise<void> {
+  if (process.platform !== 'win32') return
+  if (!steamClientStartup) {
+    const startup = startSteamClient()
+    steamClientStartup = startup
+    void startup.finally(() => {
+      if (steamClientStartup === startup) steamClientStartup = undefined
+    })
+  }
+  await steamClientStartup
+}
+
+/**
+ * Returns the Windows Steam Cloud directory used for classic (token-less)
+ * files. Aurelia's default is Linux-specific, so pass the real Steam path
+ * explicitly when Heroic runs on Windows.
+ */
+export async function getSteamCloudRemotePath(
+  appId: string
+): Promise<string | undefined> {
+  if (process.platform !== 'win32') return undefined
+
+  try {
+    const [steamLibraryPath, account] = await Promise.all([
+      getSteamLibraryPath(),
+      runAurelia<AureliaAccount>(['account'])
+    ])
+    const accountId =
+      steamAccountIdFromSession() ||
+      (account && steamAccountId(account.steam_id))
+    if (!steamLibraryPath || !accountId) return undefined
+
+    return join(steamLibraryPath, 'userdata', accountId, appId, 'remote')
+  } catch (error) {
+    logWarning(
+      ['Unable to resolve the Windows Steam Cloud path', String(error)],
       LogPrefix.Steam
     )
     return undefined

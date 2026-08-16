@@ -38,7 +38,9 @@ import {
   fetchAureliaInfo,
   parseAureliaJson,
   makeAureliaProgressHandler,
-  AureliaError
+  AureliaError,
+  ensureSteamClientRunning,
+  getSteamCloudRemotePath
 } from './aurelia'
 import type {
   AureliaAchievementsResponse,
@@ -616,8 +618,15 @@ export default class SteamGame implements Game {
     const action = direction === 'down' ? 'download' : 'upload'
     try {
       await logWriter.logInfo(`Steam Cloud sync (${action})`)
+      const cloudPath = await getSteamCloudRemotePath(this.id)
       const result = await runAurelia<AureliaCloudSyncResponse>(
-        ['cloud', 'sync', this.id, `--${direction}`],
+        [
+          'cloud',
+          'sync',
+          this.id,
+          `--${direction}`,
+          ...(cloudPath ? ['--path', cloudPath] : [])
+        ],
         {
           abortId: `${this.id}-cloud-${direction}`,
           logWriters: [logWriter]
@@ -680,10 +689,21 @@ export default class SteamGame implements Game {
       `Resolving Steam Cloud conflict: keeping ${resolve}`
     )
     try {
-      await runAurelia(['cloud', 'sync', this.id, '--resolve', resolve], {
-        abortId: `${this.id}-cloud-resolve`,
-        logWriters: logWriter ? [logWriter] : []
-      })
+      const cloudPath = await getSteamCloudRemotePath(this.id)
+      await runAurelia(
+        [
+          'cloud',
+          'sync',
+          this.id,
+          '--resolve',
+          resolve,
+          ...(cloudPath ? ['--path', cloudPath] : [])
+        ],
+        {
+          abortId: `${this.id}-cloud-resolve`,
+          logWriters: logWriter ? [logWriter] : []
+        }
+      )
     } catch (error) {
       logWarning(
         [
@@ -720,6 +740,11 @@ export default class SteamGame implements Game {
     await logWriter.logInfo(`Launching ${gameInfo.title} through Aurelia`)
 
     await this.applyPendingDlcChanges()
+
+    // Native Windows Steam games still need the desktop client for Steamworks
+    // identity. Start it silently so saves do not fall back to a blank profile
+    // when the user launched Heroic without opening Steam first.
+    await ensureSteamClientRunning()
 
     // Sync before starting a game
     await this.syncCloudSaves('down', logWriter)
